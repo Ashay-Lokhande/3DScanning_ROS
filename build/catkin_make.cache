@@ -1,0 +1,2 @@
+rvizViewer
+-DCATKIN_DEVEL_PREFIX=/home/ashaylok/3DScanner/3DScanning_ROS/devel -DCMAKE_INSTALL_PREFIX=/home/ashaylok/3DScanner/3DScanning_ROS/install -G Unix Makefiles

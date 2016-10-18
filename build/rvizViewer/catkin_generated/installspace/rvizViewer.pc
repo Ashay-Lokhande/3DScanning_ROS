@@ -1,0 +1,8 @@
+prefix=/home/ashaylok/3DScanner/3DScanning_ROS/install
+
+Name: rvizViewer
+Description: Description of rvizViewer
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/ashaylok/3DScanner/3DScanning_ROS/install/lib 
+Requires: 

@@ -1,0 +1,4 @@
+/*
+    This .cpp file will be used to find all the points in the published .pcd object 
+    model that are viewable from the pose passed in as a parameter
+*/

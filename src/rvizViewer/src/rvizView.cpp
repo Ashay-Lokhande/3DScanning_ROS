@@ -17,14 +17,14 @@ class PMDCloudPublisher
     public:
         sensor_msgs::PointCloud2 cloud;
         std::string file_name, cloud_topic;
-        pcl_ros::Publisher<sensor_msgs::PointCloud2> pub;
+        pcl_ros::Publisher<sensor_msgs::PointCloud2> pub; // publishing the point cloud information to this topic
 
         PMDCloudPublisher()
             : tf_frame("/map"),
             private_nh("~")
     {
         cloud_topic = "cloud";
-        pub.advertise(nh, cloud_topic.c_str(), 1);
+        pub.advertise(nh, cloud_topic.c_str(), 1); // published here
         private_nh.param("frame_id", tf_frame, std::string("/map"));
         ROS_INFO_STREAM("Publishing data on topic \"" << nh.resolveName(cloud_topic) << "\" with frame_id \"" << tf_frame << "\"");
     }

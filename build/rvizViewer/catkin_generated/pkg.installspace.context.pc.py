@@ -4,5 +4,5 @@ PROJECT_PKG_CONFIG_INCLUDE_DIRS = "".split(';') if "" != "" else []
 PROJECT_CATKIN_DEPENDS = "".replace(';', ' ')
 PKG_CONFIG_LIBRARIES_WITH_PREFIX = "".split(';') if "" != "" else []
 PROJECT_NAME = "rvizViewer"
-PROJECT_SPACE_DIR = "/home/ashaylok/3DScanner/3DScanning_ROS/install"
+PROJECT_SPACE_DIR = "/home/users/fri/Brahma_fall_2016/3DScanning_ROS/install"
 PROJECT_VERSION = "0.0.0"

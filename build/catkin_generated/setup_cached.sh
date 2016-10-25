@@ -7,12 +7,10 @@
 # new environment variables
 
 # modified environment variables
-export CMAKE_PREFIX_PATH="/home/ashaylok/3DScanner/3DScanning_ROS/devel:$CMAKE_PREFIX_PATH"
-export CPATH="/opt/ros/indigo/include"
-export LD_LIBRARY_PATH="/home/ashaylok/catkin_ws/devel/lib:/opt/ros/indigo/lib"
-export PATH="/opt/ros/indigo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games"
-export PKG_CONFIG_PATH="/home/ashaylok/catkin_ws/devel/lib/pkgconfig:/opt/ros/indigo/lib/pkgconfig"
-export PWD="/home/ashaylok/3DScanner/3DScanning_ROS/build"
-export PYTHONPATH="/opt/ros/indigo/lib/python2.7/dist-packages"
-export ROSLISP_PACKAGE_DIRECTORIES="/home/ashaylok/3DScanner/3DScanning_ROS/devel/share/common-lisp:$ROSLISP_PACKAGE_DIRECTORIES"
-export ROS_PACKAGE_PATH="/home/ashaylok/3DScanner/3DScanning_ROS/src:$ROS_PACKAGE_PATH"
+export CPATH="/home/users/fri/Brahma_fall_2016/3DScanning_ROS/devel/include:$CPATH"
+export LD_LIBRARY_PATH="/home/users/fri/Brahma_fall_2016/3DScanning_ROS/devel/lib:/home/users/fri/Brahma_fall_2016/3DScanning_ROS/devel/lib/x86_64-linux-gnu:/opt/ros/indigo/lib:/opt/ros/indigo/lib/x86_64-linux-gnu"
+export PATH="/home/users/fri/Brahma_fall_2016/3DScanning_ROS/devel/bin:$PATH"
+export PKG_CONFIG_PATH="/home/users/fri/Brahma_fall_2016/3DScanning_ROS/devel/lib/pkgconfig:/home/users/fri/Brahma_fall_2016/3DScanning_ROS/devel/lib/x86_64-linux-gnu/pkgconfig:/opt/ros/indigo/lib/pkgconfig:/opt/ros/indigo/lib/x86_64-linux-gnu/pkgconfig"
+export PWD="/home/users/fri/Brahma_fall_2016/3DScanning_ROS/build"
+export PYTHONPATH="/home/users/fri/Brahma_fall_2016/3DScanning_ROS/devel/lib/python2.7/dist-packages:$PYTHONPATH"
+export ROS_PACKAGE_PATH="/home/users/fri/Brahma_fall_2016/3DScanning_ROS/src:/opt/ros/indigo/share:/opt/ros/indigo/stacks"

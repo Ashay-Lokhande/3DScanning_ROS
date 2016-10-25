@@ -35,10 +35,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ashaylok/3DScanner/3DScanning_ROS/src
+CMAKE_SOURCE_DIR = /home/users/fri/Brahma_fall_2016/3DScanning_ROS/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ashaylok/3DScanner/3DScanning_ROS/build
+CMAKE_BINARY_DIR = /home/users/fri/Brahma_fall_2016/3DScanning_ROS/build
 
 # Utility rule file for clean_test_results.
 
@@ -46,7 +46,7 @@ CMAKE_BINARY_DIR = /home/ashaylok/3DScanner/3DScanning_ROS/build
 include CMakeFiles/clean_test_results.dir/progress.make
 
 CMakeFiles/clean_test_results:
-	/usr/bin/python /opt/ros/indigo/share/catkin/cmake/test/remove_test_results.py /home/ashaylok/3DScanner/3DScanning_ROS/build/test_results
+	/usr/bin/cmake -E remove_directory /home/users/fri/Brahma_fall_2016/3DScanning_ROS/build/test_results
 
 clean_test_results: CMakeFiles/clean_test_results
 clean_test_results: CMakeFiles/clean_test_results.dir/build.make
@@ -61,6 +61,6 @@ CMakeFiles/clean_test_results.dir/clean:
 .PHONY : CMakeFiles/clean_test_results.dir/clean
 
 CMakeFiles/clean_test_results.dir/depend:
-	cd /home/ashaylok/3DScanner/3DScanning_ROS/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ashaylok/3DScanner/3DScanning_ROS/src /home/ashaylok/3DScanner/3DScanning_ROS/src /home/ashaylok/3DScanner/3DScanning_ROS/build /home/ashaylok/3DScanner/3DScanning_ROS/build /home/ashaylok/3DScanner/3DScanning_ROS/build/CMakeFiles/clean_test_results.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/users/fri/Brahma_fall_2016/3DScanning_ROS/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/users/fri/Brahma_fall_2016/3DScanning_ROS/src /home/users/fri/Brahma_fall_2016/3DScanning_ROS/src /home/users/fri/Brahma_fall_2016/3DScanning_ROS/build /home/users/fri/Brahma_fall_2016/3DScanning_ROS/build /home/users/fri/Brahma_fall_2016/3DScanning_ROS/build/CMakeFiles/clean_test_results.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/clean_test_results.dir/depend
 

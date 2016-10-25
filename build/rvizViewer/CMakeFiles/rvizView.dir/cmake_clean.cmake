@@ -1,7 +1,7 @@
 FILE(REMOVE_RECURSE
   "CMakeFiles/rvizView.dir/src/rvizView.cpp.o"
-  "/home/ashaylok/3DScanner/3DScanning_ROS/devel/lib/rvizViewer/rvizView.pdb"
-  "/home/ashaylok/3DScanner/3DScanning_ROS/devel/lib/rvizViewer/rvizView"
+  "/home/users/fri/Brahma_fall_2016/3DScanning_ROS/devel/lib/rvizViewer/rvizView.pdb"
+  "/home/users/fri/Brahma_fall_2016/3DScanning_ROS/devel/lib/rvizViewer/rvizView"
 )
 
 # Per-language clean rules from dependency scanning.

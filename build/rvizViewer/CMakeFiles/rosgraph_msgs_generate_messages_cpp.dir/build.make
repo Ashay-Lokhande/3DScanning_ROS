@@ -35,10 +35,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ashaylok/3DScanner/3DScanning_ROS/src
+CMAKE_SOURCE_DIR = /home/users/fri/Brahma_fall_2016/3DScanning_ROS/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ashaylok/3DScanner/3DScanning_ROS/build
+CMAKE_BINARY_DIR = /home/users/fri/Brahma_fall_2016/3DScanning_ROS/build
 
 # Utility rule file for rosgraph_msgs_generate_messages_cpp.
 
@@ -56,10 +56,10 @@ rvizViewer/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/build: rosgraph_ms
 .PHONY : rvizViewer/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/build
 
 rvizViewer/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/clean:
-	cd /home/ashaylok/3DScanner/3DScanning_ROS/build/rvizViewer && $(CMAKE_COMMAND) -P CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/cmake_clean.cmake
+	cd /home/users/fri/Brahma_fall_2016/3DScanning_ROS/build/rvizViewer && $(CMAKE_COMMAND) -P CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/cmake_clean.cmake
 .PHONY : rvizViewer/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/clean
 
 rvizViewer/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/depend:
-	cd /home/ashaylok/3DScanner/3DScanning_ROS/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ashaylok/3DScanner/3DScanning_ROS/src /home/ashaylok/3DScanner/3DScanning_ROS/src/rvizViewer /home/ashaylok/3DScanner/3DScanning_ROS/build /home/ashaylok/3DScanner/3DScanning_ROS/build/rvizViewer /home/ashaylok/3DScanner/3DScanning_ROS/build/rvizViewer/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/users/fri/Brahma_fall_2016/3DScanning_ROS/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/users/fri/Brahma_fall_2016/3DScanning_ROS/src /home/users/fri/Brahma_fall_2016/3DScanning_ROS/src/rvizViewer /home/users/fri/Brahma_fall_2016/3DScanning_ROS/build /home/users/fri/Brahma_fall_2016/3DScanning_ROS/build/rvizViewer /home/users/fri/Brahma_fall_2016/3DScanning_ROS/build/rvizViewer/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : rvizViewer/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/depend
 

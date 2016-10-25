@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/ashaylok/3DScanner/3DScanning_ROS/src/rvizViewer/src/rvizView.cpp
+/home/users/fri/Brahma_fall_2016/3DScanning_ROS/src/rvizViewer/src/rvizView.cpp
 ros/ros.h
 -
 pcl/io/io.h
@@ -296,8 +296,6 @@ set
 list
 -
 boost/shared_ptr.hpp
--
-boost/make_shared.hpp
 -
 boost/weak_ptr.hpp
 -

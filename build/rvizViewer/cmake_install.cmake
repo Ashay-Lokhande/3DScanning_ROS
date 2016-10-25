@@ -1,8 +1,8 @@
-# Install script for directory: /home/ashaylok/3DScanner/3DScanning_ROS/src/rvizViewer
+# Install script for directory: /home/users/fri/Brahma_fall_2016/3DScanning_ROS/src/rvizViewer
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  SET(CMAKE_INSTALL_PREFIX "/home/ashaylok/3DScanner/3DScanning_ROS/install")
+  SET(CMAKE_INSTALL_PREFIX "/home/users/fri/Brahma_fall_2016/3DScanning_ROS/install")
 ENDIF(NOT DEFINED CMAKE_INSTALL_PREFIX)
 STRING(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -33,17 +33,17 @@ IF(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
 ENDIF(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
 
 IF(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  FILE(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/ashaylok/3DScanner/3DScanning_ROS/build/rvizViewer/catkin_generated/installspace/rvizViewer.pc")
+  FILE(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/users/fri/Brahma_fall_2016/3DScanning_ROS/build/rvizViewer/catkin_generated/installspace/rvizViewer.pc")
 ENDIF(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
 
 IF(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   FILE(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/rvizViewer/cmake" TYPE FILE FILES
-    "/home/ashaylok/3DScanner/3DScanning_ROS/build/rvizViewer/catkin_generated/installspace/rvizViewerConfig.cmake"
-    "/home/ashaylok/3DScanner/3DScanning_ROS/build/rvizViewer/catkin_generated/installspace/rvizViewerConfig-version.cmake"
+    "/home/users/fri/Brahma_fall_2016/3DScanning_ROS/build/rvizViewer/catkin_generated/installspace/rvizViewerConfig.cmake"
+    "/home/users/fri/Brahma_fall_2016/3DScanning_ROS/build/rvizViewer/catkin_generated/installspace/rvizViewerConfig-version.cmake"
     )
 ENDIF(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
 
 IF(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  FILE(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/rvizViewer" TYPE FILE FILES "/home/ashaylok/3DScanner/3DScanning_ROS/src/rvizViewer/package.xml")
+  FILE(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/rvizViewer" TYPE FILE FILES "/home/users/fri/Brahma_fall_2016/3DScanning_ROS/src/rvizViewer/package.xml")
 ENDIF(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
 

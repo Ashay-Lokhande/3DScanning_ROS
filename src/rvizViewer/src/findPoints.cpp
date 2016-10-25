@@ -15,16 +15,7 @@ the file rvizView
 
  */
 
-#include <ros/ros.h>                                                                
-#include <pcl/io/io.h>
-#include <pcl/io/pcd_io.h>
-#include <pcl/point_types.h>
-#include <pcl_ros/publisher.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <ros/publisher.h>
-#include <string>
-//Used to include poses = views
-#include <geometry_msgs/Pose.msg>
+#include <findPoints.h>
 
 
 class findPoints(){
@@ -32,14 +23,45 @@ class findPoints(){
     //Public function to get the pose from generateViews.cpp
     public void quantifyDataInView(const  geometry_msgs::Pose &current_view)_{
 
+    	//subscibes to the cloud topic containing the pointcloud of the object we are scanning
+    	// MAY HAVE TO CHANGE /cloud to cloud
+    	ros::Subscriber sub = n.subscribe("/cloud", 1000, cloudCallback);
+
         //call functions
-        makeCone(*current_view);
-        //retirn vaue
+        	//type cone cone = makeCone(*current_view);
+			/*
+			Looping structure that generates lines from the pose and within the cone's width view
+				loop:
+					contains a total value to count the number of lines that hit a point on the object
+					calls function and passes the line, function checks weather or not it hits the object we are scanning
+			*/
+
+        //retirn vaue whihc will be the percent (lines that hit / lines generated)
     }
+
+
+    // in preivous method we subscribe to the same topic 
+    // to which the pcd object has been published to
+    // we subscribe to that topic "/cloud" and expect the callBackFunction to get passed
+    // the pcd object
+    void cloudCallback(const sensor_msgs::PointCloud2::ConstPtr& pcdObject){
+
+    	// we get the pcd object -- like the spray bottle, etc
+
+
+  		
+	}
 
     private [type of cone] makeCone(pose){
 
-        //returns generated cone stucture
+        //returns generated cone stucture at the pise
     }
+
+    private boolean validLine(/*The line object, the .pcd object*/){
+
+    	//checks to see if the line hits a point on the object 
+    	//returns t/f depending on if it hits or not
+    }
+
 
 }

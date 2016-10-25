@@ -64,7 +64,6 @@ int main(int argc, char* argv[])
     ros::NodeHandle nh;
 
     
-
     PMDCloudPublisher c;
     c.file_name = "spray_bottle.pcd";
     nh.getParam("spray_bottle", c.file_name);

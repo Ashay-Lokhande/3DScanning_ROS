@@ -21,7 +21,7 @@ the file rvizView
 class findPoints(){
 
     //Public function to get the pose from generateViews.cpp
-    public void quantifyDataInView(const  geometry_msgs::Pose &current_view)_{
+    public void quantifyDataInView(const geometry_msgs::Pose &current_view)_{
 
     	//subscibes to the cloud topic containing the pointcloud of the object we are scanning
     	// MAY HAVE TO CHANGE /cloud to cloud

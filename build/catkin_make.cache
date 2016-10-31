@@ -1,2 +1,0 @@
-rvizViewer
--DCATKIN_DEVEL_PREFIX=/home/users/fri/Brahma_fall_2016/3DScanning_ROS/devel -DCMAKE_INSTALL_PREFIX=/home/users/fri/Brahma_fall_2016/3DScanning_ROS/install -G Unix Makefiles

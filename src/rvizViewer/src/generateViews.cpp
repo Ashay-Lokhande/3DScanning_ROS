@@ -43,6 +43,9 @@
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
+#define PI 3.141592653589793238462643383279502884197169
+#define CAMERA_HEIGHT 0;
+
 //count is a varuiable used to make sure that the node only generates the poses once
 bool first_time = false;
 //A two dimensional vector used to hold the poses generated around the object
@@ -83,11 +86,31 @@ void callback(const PointCloud::ConstPtr& msg)
 							-- Each row is a different coordinate position of the pose
 							-- Each column is a different orientation (angle) of the pose
 		*/
+    	//Finds the points of the corcel around the center of the object	
+    	for (int theta = 0; theta < 2*PI; theta += 10){
+    		float x = circle_radius * cos(theta);
+    		float y = circle_radius * sin(theta);
+    		std::vector<geometry_msgs::Pose> new_coordinate_pose;
+    		//for loop for the 5 different orientations of the poses
+    		for(int pitch_angle = 30; pitch_angle <= 150; pitch_angle += 30){
+    			geometry_msgs::Pose createdPoint;
+    			createdPoint.position.x = x;
+    			createdPoint.position.y = y;
+    			createdPoint.position.z = CAMERA_HEIGHT;
+    			createdPoint.orientation.w = 0;
+    			createdPoint.orientation.x = 0;
+    			createdPoint.orientation.y = sin(.5 * pitch_angle);
+    			createdPoint.orientation.z = sin(.5 * theta); //replace with degree change to look at the center
 
+    			//Add the calculated pose to the array of poses
+    			new_coordinate_pose.push_back(createdPoint);
+    		}
+    		//Add the vector of poses containing the same position but different orientations
+    		pose_2Dcontainer.push_back(new_coordinate_pose);
+    	} 
 
     	first_time = true;
     }
-    
     
     ROS_INFO("Center x = %f,  y = %f,  z = %f \n", center.x, center.y, center.z);
 

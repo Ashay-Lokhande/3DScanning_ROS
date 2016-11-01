@@ -22,7 +22,7 @@ class PMDCloudPublisher
     public:
         sensor_msgs::PointCloud2 cloud;
         std::string file_name, cloud_topic;
-        pcl_ros::Publisher<sensor_msgs::PointCloud2> pub; // publishing the point cloud information to this topic
+        pcl_ros::Publisher<sensor_msgs::PointCloud2> pub;
 
         PMDCloudPublisher()
             : tf_frame("/map"),

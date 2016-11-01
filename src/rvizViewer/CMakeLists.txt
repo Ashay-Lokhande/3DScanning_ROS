@@ -123,6 +123,11 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+#Below 3 lines added for the publishPCD.cpp
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
 ## Declare a C++ library
 # add_library(rvizViewer
 #   src/${PROJECT_NAME}/rvizViewer.cpp
@@ -136,6 +141,9 @@ target_link_libraries(generateViews ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
 add_executable(findPoints src/findPoints.cpp)
 target_link_libraries(findPoints ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
+add_executable (publishPCD src/publishPCD.cpp)
+target_link_libraries (publishPCD ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries

@@ -134,6 +134,9 @@ target_link_libraries(rvizView ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 add_executable(generateViews src/generateViews.cpp)
 target_link_libraries(generateViews ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
+add_executable(findPoints src/findPoints.cpp)
+target_link_libraries(findPoints ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure

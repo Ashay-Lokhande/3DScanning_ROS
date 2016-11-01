@@ -1,3 +1,8 @@
+/*
+    Publishes the .pcd data to the topic /cloud
+    Subscribe to this in order to recieve the .pcd in PointCloud2 form
+*/
+
 #include <ros/ros.h>
 #include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>

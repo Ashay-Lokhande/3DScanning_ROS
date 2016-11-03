@@ -40,6 +40,7 @@
 #include <ros/package.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Point.h>
+#include "findPoints.h"
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
@@ -58,12 +59,12 @@ void callback(const PointCloud::ConstPtr& msg)
     
     if(!first_time)
     {
-    	int numPoints = 0;
+    	float numPoints = 0;
     	printf ("Cloud: width = %d, height = %d\n", msg->width, msg->height);
 
     	/*The radius of the hypothetical circle around teh center of the point cloud where
 		  generate our poses															*/
-    	int circle_radius = (msg->width * 1.5);
+    	float circle_radius = (msg->width * 1.5);
     	
     	//Finds the center of the PointCloud
     	BOOST_FOREACH (const pcl::PointXYZ& pt, msg->points)
@@ -87,23 +88,24 @@ void callback(const PointCloud::ConstPtr& msg)
 							-- Each column is a different orientation (angle) of the pose
 		*/
     	//Finds the points of the corcel around the center of the object	
-    	for (int theta = 0; theta < 2*PI; theta += 10){
-    		float x = circle_radius * cos(theta);
-    		float y = circle_radius * sin(theta);
+    	for (float theta = 0; theta < 2*PI; theta += 0.175){
+    		float x = circle_radius * (float) cos(theta);
+    		float y = circle_radius * (float) sin(theta);
     		std::vector<geometry_msgs::Pose> new_coordinate_pose;
     		//for loop for the 5 different orientations of the poses
-    		for(int pitch_angle = 30; pitch_angle <= 150; pitch_angle += 30){
+    		for(float pitch_angle = 30; pitch_angle <= 150; pitch_angle += 30){
     			geometry_msgs::Pose createdPoint;
     			createdPoint.position.x = x;
     			createdPoint.position.y = y;
     			createdPoint.position.z = CAMERA_HEIGHT;
     			createdPoint.orientation.w = 0;
     			createdPoint.orientation.x = 0;
-    			createdPoint.orientation.y = sin(.5 * pitch_angle);
-    			createdPoint.orientation.z = sin(.5 * theta); //replace with degree change to look at the center
+    			createdPoint.orientation.y = (float) sin(.5 * pitch_angle);
+    			createdPoint.orientation.z = (float) sin(.5 * theta); //replace with degree change to look at the center
 
     			//Add the calculated pose to the array of poses
     			new_coordinate_pose.push_back(createdPoint);
+                printf ("Percent of object viewed is: %f\n", findPoints(createdPoint, msg));
     		}
     		//Add the vector of poses containing the same position but different orientations
     		pose_2Dcontainer.push_back(new_coordinate_pose);
@@ -112,7 +114,7 @@ void callback(const PointCloud::ConstPtr& msg)
     	first_time = true;
     }
     
-    ROS_INFO("Center x = %f,  y = %f,  z = %f \n", center.x, center.y, center.z);
+    //ROS_INFO("Center x = %f,  y = %f,  z = %f \n", center.x, center.y, center.z);
 
     /*
     BOOST_FOREACH (const pcl::PointXYZ& pt, msg->points)

@@ -3,6 +3,7 @@
 #include <pcl/point_types.h>
 #include <boost/foreach.hpp>
 #include <math.h>
+#include <geometry_msgs/Pose.h>
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
@@ -33,7 +34,7 @@ bool onLine(float view_x, float view_y, float view_z, float pt_x, float pt_y, fl
     // printf("Slope from view to pt: %f\n", slope_check_pt_to_pt);
     // printf("Are they equivalent?: %d\n", temp);
 
-    float delta = 0.0000045f;
+    float delta = 0.0000000045f;
 
     float diff = fabs(slope_pt_to_view - slope_check_pt_to_pt);
 
@@ -46,13 +47,15 @@ bool onLine(float view_x, float view_y, float view_z, float pt_x, float pt_y, fl
     return temp;
 }
 
-void callback(const PointCloud::ConstPtr& msg)
+float findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::ConstPtr& msg)
 {
+
     // printf ("Cloud: width = %d, height = %d\n", msg->width, msg->height);
     // Coordinates of the view pose relative to the center of the object
-    float x = 5.0;
-    float y = 5.0;
-    float z = 5.0;
+    printf("Coordinates: %f, %f, %f\n", createdPoint.position.x, createdPoint.position.y, createdPoint.position.z);
+    float x = createdPoint.position.x;
+    float y = createdPoint.position.y;
+    float z = createdPoint.position.z;
     int count = 0;
     int size = 0;
     // Compare for each point in the pcd
@@ -74,13 +77,19 @@ void callback(const PointCloud::ConstPtr& msg)
     // printf("Count: %d\n", count);
     // printf("Size: %d\n", size);
 
-    printf("Percent of points viewed from pose: %f\n", 100 * count/(float)size);
+    //printf("Percent of points viewed from pose: %f\n", 100 * count/(float)size);
+    return (100 * count / (float) (size));
 }
 
-int main(int argc, char** argv)
-{
-    ros::init(argc, argv, "generate_views");
-    ros::NodeHandle nh;
-    ros::Subscriber sub = nh.subscribe<PointCloud>("cloud", 1, callback);
-    ros::spin();
-}
+// void callback(const PointCloud::ConstPtr& msg)
+// {
+//     // printf("Percent of points viewed: %f\n", findPoints(msg));
+// }
+
+// int main(int argc, char** argv)
+// {
+//     ros::init(argc, argv, "generate_views");
+//     ros::NodeHandle nh;
+//     ros::Subscriber sub = nh.subscribe<PointCloud>("cloud", 1, callback);
+//     ros::spin();
+// }

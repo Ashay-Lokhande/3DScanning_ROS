@@ -1,16 +1,15 @@
 #ifndef FINDPOINTS_H
 #define FINDPOINTS_H
 
-#include <ros/ros.h>                                                                
-#include <pcl/io/io.h>
-#include <pcl/io/pcd_io.h>
+#include <ros/ros.h>
+#include <pcl_ros/point_cloud.h>
 #include <pcl/point_types.h>
-#include <pcl_ros/publisher.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <ros/publisher.h>
-#include <string>
-#include <geometry_msgs/Pose.msg>
+#include <boost/foreach.hpp>
+#include <math.h>
+#include <geometry_msgs/Pose.h>
 
-public void quantifyDataInView(const geometry_msgs::Pose &current_view, /* pcd file*/) {
+typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
-}
+float findPoints(const geometry_msgs::Pose, const PointCloud::ConstPtr&);
+
+#endif /* FINDPOINTS_H */

@@ -4,6 +4,7 @@
 #include <boost/foreach.hpp>
 #include <math.h>
 #include <geometry_msgs/Pose.h>
+// #include <unordered_set>
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
@@ -47,18 +48,59 @@ bool onLine(float view_x, float view_y, float view_z, float pt_x, float pt_y, fl
     return temp;
 }
 
+
+// method to find viewable points from a given view. 
+// arg1: Passed in a pose that represents a point in space
+// arg2: the point cloud object of the pcd file
+
+// PEDNING: return the actual viewable points instead of just the percentage
+// PENDING: consider orientation (various angles for a given point) when viewing the object
 float findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::ConstPtr& msg)
 {
 
-    // printf ("Cloud: width = %d, height = %d\n", msg->width, msg->height);
-    // Coordinates of the view pose relative to the center of the object
+
+	// printing the current view point
     printf("Coordinates: %f, %f, %f\n", createdPoint.position.x, createdPoint.position.y, createdPoint.position.z);
+    
+    // build a hashset and put the slopes in here
+    //std::unordered_set<float> seenSlopes;
+
+    // x,y,z represents the cooridnates of the view 
     float x = createdPoint.position.x;
     float y = createdPoint.position.y;
     float z = createdPoint.position.z;
+
+    // count of viewable points
     int count = 0;
+
+    // total number of points in the point cloud
     int size = 0;
-    // Compare for each point in the pcd
+
+    // PENDING!!
+    // idea is that for a given line from the view point, slope is the same
+    // we want to count for a single point and exclude all the other points on that line
+    // by that way we count for a single point and not count points behind the counted 
+    // point
+
+    // if slope is already contained, then check which point is closer
+    // to the view point
+    // BOOST_FOREACH (const pcl::PointXYZ& pt, msg->points) {
+    // 	float slope_pt_to_view = calculate_slope(x, y, z, pt.x, pt.y, pt.z);
+    // 	seenSlopes.insert(slope_pt_to_view); // should eradicate all duplicates
+    // 	size++; // counting total number of points viewed
+    // }
+    // return (100 * seenSlopes.size() / (float) (size)); // percentag of points viewed
+
+
+
+    // old implementation!
+
+    // traverse through points of the point cloud
+    // for a given point we scan all the same points
+    // for each pair of points, we check if they have the same slope or comparable slopes
+    // if they are similar we discount this because we have seen this point before
+    // by this way we count all the points, without duplicates
+    // by doing numberInLine <=1 we make sure we count only unique points and not duplicates
     BOOST_FOREACH (const pcl::PointXYZ& pt, msg->points) {
         int numberInLine = 0;
         BOOST_FOREACH (const pcl::PointXYZ& pt2, msg->points) {
@@ -78,6 +120,9 @@ float findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::Const
     // printf("Size: %d\n", size);
 
     //printf("Percent of points viewed from pose: %f\n", 100 * count/(float)size);
+
+    // finally return a ratio of the points seen to the total number of points 
+    // in the pcl 
     return (100 * count / (float) (size));
 }
 

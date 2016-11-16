@@ -118,7 +118,6 @@ float findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::Const
 
     // printf("Count: %d\n", count);
     // printf("Size: %d\n", size);
-
     //printf("Percent of points viewed from pose: %f\n", 100 * count/(float)size);
 
     // finally return a ratio of the points seen to the total number of points 

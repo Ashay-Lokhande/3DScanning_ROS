@@ -87,7 +87,7 @@ void callback(const PointCloud::ConstPtr& msg)
 							-- Each row is a different coordinate position of the pose
 							-- Each column is a different orientation (angle) of the pose
 		*/
-    	//Finds the points of the corcel around the center of the object	
+    	//Finds the points of the circle around the center of the object	
     	for (float theta = 0; theta < 2*PI; theta += 0.175){
     		float x = circle_radius * (float) cos(theta);
     		float y = circle_radius * (float) sin(theta);
@@ -124,10 +124,25 @@ void callback(const PointCloud::ConstPtr& msg)
 
 int main(int argc, char** argv)
 {
+    //Subscriber 
     ros::init(argc, argv, "generate_views");
     ros::NodeHandle nh;
     ros::Subscriber sub = nh.subscribe<PointCloud>("cloud", 1, callback);
-    ros::spin();
+    ros:: spin();
+
+/*
+    //Publsher
+    ros::NodeHandle n;
+    ros::Publisher pub = n.advertise<std::vector<std::vector<geometry_msgs::Pose> > >("poses", 1);
+    ros::Rate loop_rate(10);
+
+    while (ros::ok())
+    {
+        pub.publish(pose_2Dcontainer);
+        loop_rate.sleep();
+    }
+*/
+    //ros::spin();
 }
 
 

@@ -88,8 +88,8 @@ float findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::Const
     // if slope is already contained, then check which point is closer
     // to the view point
     // map for: slope -> point
-    std::map<float, Point> viewablePoints;
-    std::map<float, Point>::iterator it;
+    std::map<float, geometry_msgs::Pose> viewablePoints;
+    std::map<float, geometry_msgs::Pose>::iterator it;
     BOOST_FOREACH (const pcl::PointXYZ& pt, msg->points) {
         float slope_pt_to_view = (int) floorf(calculate_slope(x, y, z, pt.x, pt.y, pt.z) * 100000000.0 + 0.5)/100000000.0;
         it = viewablePoints.find(slope_pt_to_view);
@@ -99,15 +99,15 @@ float findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::Const
             // if the slop is already taken into account
             // then we must see the point it corresponds to is the closest to the view point
             // if this new point is closer then must updates the map accordingly
-            Point existingPoint = it->second; // get the point
-            float oldDistance = distance(x, y, z, existingPoint.x, existingPoint.y, existingPoint.z);
+            geometry_msgs::Pose existingPoint = it->second; // get the point
+            float oldDistance = distance(x, y, z, existingPoint.position.x, existingPoint.position.y, existingPoint.position.z);
             float newDistance = distance(x, y, z, pt.x, pt.y, pt.z);
             if(newDistance < oldDistance) {
-                Point newPoint;
-                newPoint.x = pt.x;
-                newPoint.y = pt.y;
-                newPoint.z = pt.z;
-                viewablePoints.insert(std::pair<float, Point> (slope_pt_to_view, newPoint));
+            	geometry_msgs::Pose newPose;
+    			newPose.position.x = pt.x;
+    			newPose.position.y = pt.y;
+    			newPose.position.z = pt.z;
+                viewablePoints.insert(std::pair<float, geometry_msgs::Pose> (slope_pt_to_view, newPose));
                 //printf("Old point: %f, %f, %f with distance of %f\n", existingPoint.x, existingPoint.y, existingPoint.z, oldDistance);
                 //printf("New point: %f, %f, %f with distance of %f\n", newPoint.x, newPoint.y, newPoint.z, newDistance);
             }
@@ -115,11 +115,11 @@ float findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::Const
         } else {
             // first time looking at this point
             // just add it
-            Point p;
-            p.x = pt.x;
-            p.y = pt.y;
-            p.z = pt.z;
-            viewablePoints.insert(std::pair<float, Point> (slope_pt_to_view, p));
+            geometry_msgs::Pose newPose;
+            newPose.position.x = pt.x;
+            newPose.position.y = pt.y;
+            newPose.position.z = pt.z;
+            viewablePoints.insert(std::pair<float, geometry_msgs::Pose> (slope_pt_to_view, newPose));
         }
         size++; // totalNum points
     }

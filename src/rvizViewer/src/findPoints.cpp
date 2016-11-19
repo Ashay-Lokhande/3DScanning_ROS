@@ -7,6 +7,19 @@
 #include <set>
 #include <map>
 
+
+// consists of redundancy, remove later
+// copied from rvizView to work with PointCloud2 object
+#include <ros/ros.h>
+#include <pcl/io/io.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl_ros/publisher.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <ros/publisher.h>
+#include <string>
+#include <pcl_ros/point_cloud.h>
+
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
 
@@ -17,6 +30,72 @@ struct Point {
     float y;
     float z;
 };
+
+
+class PMDCloudPublisher
+{
+    // protected:
+    //     std::string tf_frame;
+    //     ros::NodeHandle nh;
+    //     ros::NodeHandle private_nh;
+
+    // public:
+    //     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
+    //     std::string file_name, cloud_topic;
+    //     pcl_ros::Publisher<sensor_msgs::PointCloud2> pub;
+
+    //     PMDCloudPublisher()
+    //         : tf_frame("/map"),
+    //         private_nh("~")
+    // {
+    //     cloud_topic = "cloud";
+    //     pub.advertise(nh, cloud_topic.c_str(), 1); // published here
+    //     private_nh.param("frame_id", tf_frame, std::string("/map"));
+    //     ROS_INFO_STREAM("Publishing data on topic \"" << nh.resolveName(cloud_topic) << "\" with frame_id \"" << tf_frame << "\"");
+    // }
+
+    //     bool spin ()
+    //     {
+    //         int nr_points = cloud->width * cloud->height;
+    //         std::string fields_list = pcl::getFieldsList(cloud);
+    //         ros::Rate r(40);
+
+    //         while(nh.ok ())
+    //         {
+    //             ROS_DEBUG_STREAM_ONCE("Publishing data with " << nr_points
+    //                     << " points " << fields_list
+    //                     << " on topic \"" << nh.resolveName(cloud_topic)
+    //                     << "\" in frame \"" << cloud.header.frame_id << "\"");
+    //             // cloud.header.stamp = ros::Time::now();
+    //             pub.publish(cloud);
+
+    //             r.sleep();
+    //         }
+    //         return (true);
+    //     }
+};
+
+
+void publishData(pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud, std::map<float, geometry_msgs::Pose> viewablePoints){
+
+    // //ros::init (1, temp, "cloud_publisher");
+    // ros::NodeHandle nh;
+
+    
+    // PMDCloudPublisher c;
+    // c.file_name = "spray_bottle.pcd";
+    // c.cloud = filteredCloud;
+    // nh.getParam(filteredCloud, c.cloud);
+
+    // if (c.start () == -1)
+    // {
+    //     ROS_ERROR_STREAM("Could not load file \"" << c.file_name  <<"\". Exiting...");
+    // }
+    // ROS_INFO_STREAM("Loaded a point cloud with " << c.cloud.width * c.cloud.height
+    //         << " points (total size is " << c.cloud.data.size() << ") and the following channels: " << pcl::getFieldsList (c.cloud));
+    // c.spin();
+}
+
 
 // calculating slope of line formed by two points in 3d space
 float calculate_slope(float pt_x, float pt_y, float pt_z, float pt2_x, float pt2_y, float pt2_z)
@@ -122,13 +201,47 @@ float findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::Const
             viewablePoints.insert(std::pair<float, geometry_msgs::Pose> (slope_pt_to_view, newPose));
         }
         size++; // totalNum points
+
     }
+
+
 
     // displaying contents of the map
     // multipying by 10000 because %f truncates values, so it appears as if duplictes exist
     // for(it = viewablePoints.begin(); it != viewablePoints.end(); it++){
     //     printf("key: %f, Value: %f, %f, %f\n", it->first * 10000, it->second.x, it->second.y, it->second.z);
     // }
+
+
+    // at this point we have filtered points based on slope,distance and angle
+    // these points need to be used to create a pointcloud2 object
+    // once this is created, we will publish this to rviz and view it accoringly
+    // references to publishing to rviz check rvizView and generateViews.cpp
+
+    // in progress
+    // refer: http://wiki.ros.org/pcl_ros
+    // refer: http://pointclouds.org/documentation/tutorials/passthrough.php
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud (new pcl::PointCloud<pcl::PointXYZ>);
+
+    filteredCloud->width = viewablePoints.size(); // need to verify
+    filteredCloud->height = 1;
+    filteredCloud->points.resize(filteredCloud->width * filteredCloud->height);
+
+    int filterIndex = 0;
+
+    // loading a new pointcloud object from the points that we collected
+    for(it = viewablePoints.begin(); it != viewablePoints.end(); it++, filterIndex++){
+
+    	// ideally no segfaults because filterdCloud size 
+    	// is viewable points * 1 == viewablePoints.size();
+    	filteredCloud->points[filterIndex].x = it->second.position.x;
+    	filteredCloud->points[filterIndex].y = it->second.position.y;
+    	filteredCloud->points[filterIndex].z = it->second.position.z;
+    }
+
+    publishData(filteredCloud, viewablePoints);
+
     float viewableAmount = 100 * viewablePoints.size() / (float) (size);
     return viewableAmount; // percentag of points viewed
 

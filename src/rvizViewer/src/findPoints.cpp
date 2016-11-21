@@ -145,7 +145,7 @@ float distance(float x1, float y1, float z1, float x2, float y2, float z2){
 // arg2: the point cloud object of the pcd file
 
 // PENDING: consider orientation (various angles for a given point) when viewing the object
-float findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::ConstPtr& msg)
+void findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::ConstPtr& msg)
 {
 
 
@@ -170,7 +170,8 @@ float findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::Const
     std::map<float, geometry_msgs::Pose> viewablePoints;
     std::map<float, geometry_msgs::Pose>::iterator it;
     BOOST_FOREACH (const pcl::PointXYZ& pt, msg->points) {
-        float slope_pt_to_view = (int) floorf(calculate_slope(x, y, z, pt.x, pt.y, pt.z) * 100000000.0 + 0.5)/100000000.0;
+
+        float slope_pt_to_view = round(calculate_slope(x, y, z, pt.x, pt.y, pt.z) * 100000.0) / 100000.0 ;
         it = viewablePoints.find(slope_pt_to_view);
 
         // if slope is already present
@@ -222,12 +223,16 @@ float findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::Const
     // refer: http://wiki.ros.org/pcl_ros
     // refer: http://pointclouds.org/documentation/tutorials/passthrough.php
 
+    // publishing data set
+    ros::NodeHandle nh;
+    ros::Publisher pub = nh.advertise<PointCloud> ("fileredCloud", 1);
+
     pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud (new pcl::PointCloud<pcl::PointXYZ>);
 
     filteredCloud->width = viewablePoints.size(); // need to verify
     filteredCloud->height = 1;
     filteredCloud->points.resize(filteredCloud->width * filteredCloud->height);
-
+    filteredCloud->header.frame_id = "/map";
     int filterIndex = 0;
 
     // loading a new pointcloud object from the points that we collected
@@ -238,12 +243,29 @@ float findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::Const
     	filteredCloud->points[filterIndex].x = it->second.position.x;
     	filteredCloud->points[filterIndex].y = it->second.position.y;
     	filteredCloud->points[filterIndex].z = it->second.position.z;
+
     }
 
-    publishData(filteredCloud, viewablePoints);
+    // publishing to rviz topic
+    // currently infinite
+    ros::Rate loop_rate(4);
+    while (nh.ok()) {
+        filteredCloud->header.stamp = ros::Time::now().toNSec();
+        pub.publish (filteredCloud);
 
-    float viewableAmount = 100 * viewablePoints.size() / (float) (size);
-    return viewableAmount; // percentag of points viewed
+        printf("view coordinates: %f, %f, %f - viewable: %f\n", x,y,z, 100 * viewablePoints.size() / (float) (size));
+        ros::spinOnce ();
+        loop_rate.sleep ();
+    }
+
+    // for modularity, break into separate methods
+    // publishData(filteredCloud, viewablePoints);
+
+
+
+
+    //float viewableAmount = 
+    //return viewableAmount; // percentag of points viewed
 
 
 

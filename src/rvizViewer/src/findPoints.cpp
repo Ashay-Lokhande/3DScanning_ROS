@@ -21,7 +21,7 @@
 #include <pcl_ros/point_cloud.h>
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
-
+#define PI 3.141592653589793238462643383279502884197169
 
 // represnts a point with x,y,z coordinates
 struct Point {
@@ -112,6 +112,13 @@ float calculate_2d_slope (float x, float y, float pt_x, float pt_y)
     float rise = pt_y - y;
     float run = pt_x - x;
     return rise/run;
+}
+
+float calculate_angle (float x, float z, float pt_x, float pt_z)
+{
+    float angle = atan2(pt_z - z, pt_x - x);
+    float degrees = angle * 180 / PI;
+    return degrees;
 }
 
 // bool onLine(float view_x, float view_y, float view_z, float pt_x, float pt_y, float pt_z, float check_pt_x, float check_pt_y, float check_pt_z)
@@ -209,35 +216,40 @@ void findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::ConstP
         // I am assuming that vertical slope is a calculation of the y and z coordinates
         float vertical_slope = calculate_2d_slope(y, z, pt.y, pt.z);
         if (vertical_slope >= min_y_slope && vertical_slope <= max_y_slope) {
-            float slope_pt_to_view = round(calculate_slope(x, y, z, pt.x, pt.y, pt.z) * 100000.0) / 100000.0 ;
-            it = viewablePoints.find(slope_pt_to_view);
 
-            // if slope is already present
-            if(it != viewablePoints.end()){
-                // if the slop is already taken into account
-                // then we must see the point it corresponds to is the closest to the view point
-                // if this new point is closer then must updates the map accordingly
-                geometry_msgs::Pose existingPoint = it->second; // get the point
-                float oldDistance = distance(x, y, z, existingPoint.position.x, existingPoint.position.y, existingPoint.position.z);
-                float newDistance = distance(x, y, z, pt.x, pt.y, pt.z);
-                if(newDistance < oldDistance) {
-                	geometry_msgs::Pose newPose;
-        			newPose.position.x = pt.x;
-        			newPose.position.y = pt.y;
-        			newPose.position.z = pt.z;
+            angle = calculate_angle(x, z, pt.x, pt.z);
+            if (abs(angle) <= 60) {
+
+                float slope_pt_to_view = round(calculate_slope(x, y, z, pt.x, pt.y, pt.z) * 100000.0) / 100000.0 ;
+                it = viewablePoints.find(slope_pt_to_view);
+
+                // if slope is already present
+                if(it != viewablePoints.end()) {
+                    // if the slop is already taken into account
+                    // then we must see the point it corresponds to is the closest to the view point
+                    // if this new point is closer then must updates the map accordingly
+                    geometry_msgs::Pose existingPoint = it->second; // get the point
+                    float oldDistance = distance(x, y, z, existingPoint.position.x, existingPoint.position.y, existingPoint.position.z);
+                    float newDistance = distance(x, y, z, pt.x, pt.y, pt.z);
+                    if(newDistance < oldDistance) {
+                    	geometry_msgs::Pose newPose;
+            			newPose.position.x = pt.x;
+            			newPose.position.y = pt.y;
+            			newPose.position.z = pt.z;
+                        viewablePoints.insert(std::pair<float, geometry_msgs::Pose> (slope_pt_to_view, newPose));
+                        //printf("Old point: %f, %f, %f with distance of %f\n", existingPoint.x, existingPoint.y, existingPoint.z, oldDistance);
+                        //printf("New point: %f, %f, %f with distance of %f\n", newPoint.x, newPoint.y, newPoint.z, newDistance);
+                    }
+
+                } else {
+                    // first time looking at this point
+                    // just add it
+                    geometry_msgs::Pose newPose;
+                    newPose.position.x = pt.x;
+                    newPose.position.y = pt.y;
+                    newPose.position.z = pt.z;
                     viewablePoints.insert(std::pair<float, geometry_msgs::Pose> (slope_pt_to_view, newPose));
-                    //printf("Old point: %f, %f, %f with distance of %f\n", existingPoint.x, existingPoint.y, existingPoint.z, oldDistance);
-                    //printf("New point: %f, %f, %f with distance of %f\n", newPoint.x, newPoint.y, newPoint.z, newDistance);
                 }
-
-            } else {
-                // first time looking at this point
-                // just add it
-                geometry_msgs::Pose newPose;
-                newPose.position.x = pt.x;
-                newPose.position.y = pt.y;
-                newPose.position.z = pt.z;
-                viewablePoints.insert(std::pair<float, geometry_msgs::Pose> (slope_pt_to_view, newPose));
             }
         }
         size++; // totalNum points

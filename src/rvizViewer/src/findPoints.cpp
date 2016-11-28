@@ -107,6 +107,13 @@ float calculate_slope(float pt_x, float pt_y, float pt_z, float pt2_x, float pt2
     return rise/run;
 }   
 
+float calculate_2d_slope (float x, float y, float pt_x, float pt_y)
+{
+    float rise = pt_y - y;
+    float run = pt_x - x;
+    return rise/run;
+}
+
 // bool onLine(float view_x, float view_y, float view_z, float pt_x, float pt_y, float pt_z, float check_pt_x, float check_pt_y, float check_pt_z)
 // {
 //     // Calculate the slope from the view to the check_pt
@@ -157,6 +164,34 @@ void findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::ConstP
     float y = createdPoint.position.y;
     float z = createdPoint.position.z;
 
+    // pitch_angle and theta represent the angles relative to the view
+    // pitch_angle is the rotation of the camera
+    // theta is the rotation of the robot relative to the center
+    float pitch_angle = (float) (2 * asin(createdPoint.orientation.y));
+    float theta = (float) (2 * asin(createdPoint.orientation.z));
+
+    // figure out the max slope and min slope on the y, z plane
+    // given a specific camera pitch angle - this will help limit which points should be considered viewable
+    // assuming a 60 degree camera viewfinder (vertically)
+    float max_y_slope, min_y_slope;
+
+    if (pitch_angle = 30) {
+        max_y_slope = 1.73;
+        min_y_slope = 0;
+    } else if (pitch_angle = 60) {
+        max_y_slope = 9;
+        min_y_slope = 0.577;
+    } else if (pitch_angle = 90) {
+        max_y_slope = 1.73;
+        min_y_slope = -1.73;
+    } else if (pitch_angle = 120) {
+        max_y_slope = 9;
+        min_y_slope = -0.577;
+    } else if (pitch_angle = 150) {
+        max_y_slope = 0;
+        min_y_slope = -1.73;
+    }
+
     // total number of points in the point cloud
     int size = 0;
 
@@ -170,36 +205,40 @@ void findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::ConstP
     std::map<float, geometry_msgs::Pose> viewablePoints;
     std::map<float, geometry_msgs::Pose>::iterator it;
     BOOST_FOREACH (const pcl::PointXYZ& pt, msg->points) {
+        // ensures that the point in question is within the camera viewpoint (using the physical slopes calculated above)
+        // I am assuming that vertical slope is a calculation of the y and z coordinates
+        float vertical_slope = calculate_2d_slope(y, z, pt.y, pt.z);
+        if (vertical_slope >= min_y_slope && vertical_slope <= max_y_slope) {
+            float slope_pt_to_view = round(calculate_slope(x, y, z, pt.x, pt.y, pt.z) * 100000.0) / 100000.0 ;
+            it = viewablePoints.find(slope_pt_to_view);
 
-        float slope_pt_to_view = round(calculate_slope(x, y, z, pt.x, pt.y, pt.z) * 100000.0) / 100000.0 ;
-        it = viewablePoints.find(slope_pt_to_view);
+            // if slope is already present
+            if(it != viewablePoints.end()){
+                // if the slop is already taken into account
+                // then we must see the point it corresponds to is the closest to the view point
+                // if this new point is closer then must updates the map accordingly
+                geometry_msgs::Pose existingPoint = it->second; // get the point
+                float oldDistance = distance(x, y, z, existingPoint.position.x, existingPoint.position.y, existingPoint.position.z);
+                float newDistance = distance(x, y, z, pt.x, pt.y, pt.z);
+                if(newDistance < oldDistance) {
+                	geometry_msgs::Pose newPose;
+        			newPose.position.x = pt.x;
+        			newPose.position.y = pt.y;
+        			newPose.position.z = pt.z;
+                    viewablePoints.insert(std::pair<float, geometry_msgs::Pose> (slope_pt_to_view, newPose));
+                    //printf("Old point: %f, %f, %f with distance of %f\n", existingPoint.x, existingPoint.y, existingPoint.z, oldDistance);
+                    //printf("New point: %f, %f, %f with distance of %f\n", newPoint.x, newPoint.y, newPoint.z, newDistance);
+                }
 
-        // if slope is already present
-        if(it != viewablePoints.end()){
-            // if the slop is already taken into account
-            // then we must see the point it corresponds to is the closest to the view point
-            // if this new point is closer then must updates the map accordingly
-            geometry_msgs::Pose existingPoint = it->second; // get the point
-            float oldDistance = distance(x, y, z, existingPoint.position.x, existingPoint.position.y, existingPoint.position.z);
-            float newDistance = distance(x, y, z, pt.x, pt.y, pt.z);
-            if(newDistance < oldDistance) {
-            	geometry_msgs::Pose newPose;
-    			newPose.position.x = pt.x;
-    			newPose.position.y = pt.y;
-    			newPose.position.z = pt.z;
+            } else {
+                // first time looking at this point
+                // just add it
+                geometry_msgs::Pose newPose;
+                newPose.position.x = pt.x;
+                newPose.position.y = pt.y;
+                newPose.position.z = pt.z;
                 viewablePoints.insert(std::pair<float, geometry_msgs::Pose> (slope_pt_to_view, newPose));
-                //printf("Old point: %f, %f, %f with distance of %f\n", existingPoint.x, existingPoint.y, existingPoint.z, oldDistance);
-                //printf("New point: %f, %f, %f with distance of %f\n", newPoint.x, newPoint.y, newPoint.z, newDistance);
             }
-
-        } else {
-            // first time looking at this point
-            // just add it
-            geometry_msgs::Pose newPose;
-            newPose.position.x = pt.x;
-            newPose.position.y = pt.y;
-            newPose.position.z = pt.z;
-            viewablePoints.insert(std::pair<float, geometry_msgs::Pose> (slope_pt_to_view, newPose));
         }
         size++; // totalNum points
 

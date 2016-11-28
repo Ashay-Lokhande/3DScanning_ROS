@@ -107,6 +107,7 @@ float calculate_slope(float pt_x, float pt_y, float pt_z, float pt2_x, float pt2
     return rise/run;
 }   
 
+// calculate the slope in a 2d plane - used to calculate the slope in the y-z plane
 float calculate_2d_slope (float x, float y, float pt_x, float pt_y)
 {
     float rise = pt_y - y;
@@ -114,6 +115,7 @@ float calculate_2d_slope (float x, float y, float pt_x, float pt_y)
     return rise/run;
 }
 
+// calculate the angle from the horizontal for two points in a 2d plane - used to calculate the angle in the x-z plane
 float calculate_angle (float x, float z, float pt_x, float pt_z)
 {
     float angle = atan2(pt_z - z, pt_x - x);
@@ -216,8 +218,9 @@ void findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::ConstP
         // I am assuming that vertical slope is a calculation of the y and z coordinates
         float vertical_slope = calculate_2d_slope(y, z, pt.y, pt.z);
         if (vertical_slope >= min_y_slope && vertical_slope <= max_y_slope) {
-
+            // calculate the angle between the camera and the point in question
             angle = calculate_angle(x, z, pt.x, pt.z);
+            // if it is within the horizontal view range of the camera, proceed, otherwise stop
             if (abs(angle) <= 60) {
 
                 float slope_pt_to_view = round(calculate_slope(x, y, z, pt.x, pt.y, pt.z) * 100000.0) / 100000.0 ;

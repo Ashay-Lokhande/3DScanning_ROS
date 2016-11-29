@@ -41,6 +41,7 @@
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Point.h>
 #include "findPoints.h"
+#include <cmath>
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
@@ -59,7 +60,8 @@ void callback(const PointCloud::ConstPtr& msg)
     
     if(!first_time)
     {
-    	float numPoints = 0;
+    	int i = 0, j = 0;
+        float numPoints = 0;
     	printf ("Cloud: width = %d, height = %d\n", msg->width, msg->height);
 
     	/*The radius of the hypothetical circle around teh center of the point cloud where
@@ -88,7 +90,8 @@ void callback(const PointCloud::ConstPtr& msg)
 							-- Each column is a different orientation (angle) of the pose
 		*/
     	//Finds the points of the circle around the center of the object	
-    	for (float theta = 0; theta < 2*PI; theta += 0.175){
+    	
+    	/*for (float theta = 0; theta < 2*PI; theta += 0.175){
     		float x = circle_radius * (float) cos(theta);
     		float y = circle_radius * (float) sin(theta);
     		std::vector<geometry_msgs::Pose> new_coordinate_pose;
@@ -110,6 +113,42 @@ void callback(const PointCloud::ConstPtr& msg)
     		//Add the vector of poses containing the same position but different orientations
     		pose_2Dcontainer.push_back(new_coordinate_pose);
     	} 
+		*/
+
+    	for ( i -= circle_radius; i < circle_radius; i++)
+        {
+            for (j -= circle_radius; j < circle_radius; j++)
+            {
+                int condition_code = abs( i*i + j*j - circle_radius*circle_radius);
+                if (condition_code < 5)
+                {
+                    std:std::vector<geometry_msgs::Pose> new_coordinate_pose;
+                    for (float pitch_angle = 30; pitch_angle <= 150; pitch_angle += 30)
+                    {
+                        //angle to orient the pose to face the center of the circle
+                        double theta = atan2(j - center.y, i -center.x);
+                        //theta = theta * 180 / PI; //convert to degrees
+
+                        geometry_msgs::Pose createdPoint;
+                        createdPoint.position.x = i;
+                        createdPoint.position.y = j;
+                        createdPoint.position.z = CAMERA_HEIGHT;
+                        createdPoint.orientation.w = 0;
+                        createdPoint.orientation.x = 0;
+                        createdPoint.orientation.y = (float) sin(.5 * pitch_angle);
+                        createdPoint.orientation.z = (float) sin(.5 * theta); //replace the orientation z to face towards center
+
+                        new_coordinate_pose.push_back(createdPoint);
+                        printf("Percent of the object viewed is: %f\n", findPoints(createdPoint, msg) );
+                    }
+                    pose_2Dcontainer.push_back(new_coordinate_pose);
+                    //printf("*");
+                } /* else {
+                        printf(" ");
+                     } */
+            }
+            //printf("\n");
+        }	            
 
     	first_time = true;
     }

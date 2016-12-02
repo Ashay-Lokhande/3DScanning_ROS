@@ -41,6 +41,11 @@
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Point.h>
 #include "findPoints.h"
+#include <pcl/io/io.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl_ros/publisher.h>
+#include <pcl_conversions/pcl_conversions.h>
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
@@ -60,7 +65,7 @@ void callback(const PointCloud::ConstPtr& msg)
     if(!first_time)
     {
     	float numPoints = 0;
-    	printf ("Cloud: width = %d, height = %d\n", msg->width, msg->height);
+    	//printf ("Cloud: width = %d, height = %d\n", msg->width, msg->height);
 
     	/*The radius of the hypothetical circle around teh center of the point cloud where
 		  generate our poses															*/
@@ -87,6 +92,17 @@ void callback(const PointCloud::ConstPtr& msg)
 							-- Each row is a different coordinate position of the pose
 							-- Each column is a different orientation (angle) of the pose
 		*/
+
+        // vector used to collect all the filtered clouds, we will develop most efficienct sets from this list of filetered clouds
+
+        //std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> filteredObjects;
+
+        std::vector<finalFilteredCloud> filteredObjects;
+
+        // counter is used for publishing purposes
+        // we dont want to publish a cloud to a given topic and then overwrite
+        // that with another
+        int filteredObjectCounter = 0;
     	//Finds the points of the circle around the center of the object	
     	for (float theta = 0; theta < 2*PI; theta += 0.175){
     		float x = circle_radius * (float) cos(theta);
@@ -94,22 +110,33 @@ void callback(const PointCloud::ConstPtr& msg)
     		std::vector<geometry_msgs::Pose> new_coordinate_pose;
     		//for loop for the 5 different orientations of the poses
     		for(float pitch_angle = 30; pitch_angle <= 150; pitch_angle += 30){
-    			geometry_msgs::Pose createdPoint;
-    			createdPoint.position.x = x;
-    			createdPoint.position.y = y;
-    			createdPoint.position.z = CAMERA_HEIGHT;
-    			createdPoint.orientation.w = 0;
-    			createdPoint.orientation.x = 0;
-    			createdPoint.orientation.y = (float) sin(.5 * pitch_angle);
-    			createdPoint.orientation.z = (float) sin(.5 * theta); //replace with degree change to look at the center
+    			geometry_msgs::Pose viewPoint;
+    			viewPoint.position.x = x;
+    			viewPoint.position.y = y;
+    			viewPoint.position.z = CAMERA_HEIGHT;
+    			viewPoint.orientation.w = 0;
+    			viewPoint.orientation.x = 0;
+    			viewPoint.orientation.y = (float) sin(.5 * pitch_angle);
+    			viewPoint.orientation.z = (float) sin(.5 * theta); //replace with degree change to look at the center
+
+                // below there is a one to one correspondence between a viewPoint and the filteredObject produced.
+                // in other words, the viewPoint at new_coordinate_pose.get(i) produced the filteredCloud at filteredObjects.get(i)
 
     			//Add the calculated pose to the array of poses
-    			new_coordinate_pose.push_back(createdPoint);
-                printf ("Percent of object viewed is: %f\n", findPoints(createdPoint, msg));
+    			new_coordinate_pose.push_back(viewPoint);
+
+                // filtering out the cloud based on input and collecting all those point clouds
+                filteredObjects.push_back(findPoints(viewPoint, msg, filteredObjectCounter));
+                filteredObjectCounter++;
+
+                //printf ("Percent of object viewed is: %f\n", findPoints(viewPoint, msg));
     		}
     		//Add the vector of poses containing the same position but different orientations
     		pose_2Dcontainer.push_back(new_coordinate_pose);
-    	} 
+    	}
+
+        // at this point we want to visualize the filteredClouds produced and the viewPoint that generated them.
+        printf("collected clouds: %d\n", filteredObjects.size()); 
 
     	first_time = true;
     }

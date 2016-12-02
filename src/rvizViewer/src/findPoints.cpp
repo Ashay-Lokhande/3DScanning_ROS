@@ -20,82 +20,18 @@
 #include <string>
 #include <pcl_ros/point_cloud.h>
 
+using namespace std;
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 #define PI 3.141592653589793238462643383279502884197169
 
-// represnts a point with x,y,z coordinates
-struct Point {
 
-    float x;
-    float y;
-    float z;
+struct finalFilteredCloud {
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
+    geometry_msgs::Pose viewedFrom;
+    double percentageViewed;
+
 };
-
-
-class PMDCloudPublisher
-{
-    // protected:
-    //     std::string tf_frame;
-    //     ros::NodeHandle nh;
-    //     ros::NodeHandle private_nh;
-
-    // public:
-    //     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
-    //     std::string file_name, cloud_topic;
-    //     pcl_ros::Publisher<sensor_msgs::PointCloud2> pub;
-
-    //     PMDCloudPublisher()
-    //         : tf_frame("/map"),
-    //         private_nh("~")
-    // {
-    //     cloud_topic = "cloud";
-    //     pub.advertise(nh, cloud_topic.c_str(), 1); // published here
-    //     private_nh.param("frame_id", tf_frame, std::string("/map"));
-    //     ROS_INFO_STREAM("Publishing data on topic \"" << nh.resolveName(cloud_topic) << "\" with frame_id \"" << tf_frame << "\"");
-    // }
-
-    //     bool spin ()
-    //     {
-    //         int nr_points = cloud->width * cloud->height;
-    //         std::string fields_list = pcl::getFieldsList(cloud);
-    //         ros::Rate r(40);
-
-    //         while(nh.ok ())
-    //         {
-    //             ROS_DEBUG_STREAM_ONCE("Publishing data with " << nr_points
-    //                     << " points " << fields_list
-    //                     << " on topic \"" << nh.resolveName(cloud_topic)
-    //                     << "\" in frame \"" << cloud.header.frame_id << "\"");
-    //             // cloud.header.stamp = ros::Time::now();
-    //             pub.publish(cloud);
-
-    //             r.sleep();
-    //         }
-    //         return (true);
-    //     }
-};
-
-
-void publishData(pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud, std::map<float, geometry_msgs::Pose> viewablePoints){
-
-    // //ros::init (1, temp, "cloud_publisher");
-    // ros::NodeHandle nh;
-
-    
-    // PMDCloudPublisher c;
-    // c.file_name = "spray_bottle.pcd";
-    // c.cloud = filteredCloud;
-    // nh.getParam(filteredCloud, c.cloud);
-
-    // if (c.start () == -1)
-    // {
-    //     ROS_ERROR_STREAM("Could not load file \"" << c.file_name  <<"\". Exiting...");
-    // }
-    // ROS_INFO_STREAM("Loaded a point cloud with " << c.cloud.width * c.cloud.height
-    //         << " points (total size is " << c.cloud.data.size() << ") and the following channels: " << pcl::getFieldsList (c.cloud));
-    // c.spin();
-}
-
 
 // calculating slope of line formed by two points in 3d space
 float calculate_slope(float pt_x, float pt_y, float pt_z, float pt2_x, float pt2_y, float pt2_z)
@@ -123,32 +59,6 @@ float calculate_angle (float x, float z, float pt_x, float pt_z)
     return degrees;
 }
 
-// bool onLine(float view_x, float view_y, float view_z, float pt_x, float pt_y, float pt_z, float check_pt_x, float check_pt_y, float check_pt_z)
-// {
-//     // Calculate the slope from the view to the check_pt
-//     float slope_pt_to_view = calculate_slope(view_x, view_y, view_z, check_pt_x, check_pt_y, check_pt_z);
-
-//     // printf("Slope from view to check_pt: %f\n", slope_pt_to_view);
-
-//     // Calculate slope from the check_pt to the pt
-//     float slope_check_pt_to_pt = calculate_slope(view_x, view_y, view_z, pt_x, pt_y, pt_z);
-
-//     // printf("Slope from view to pt: %f\n", slope_check_pt_to_pt);
-//     // printf("Are they equivalent?: %d\n", temp);
-
-//     float delta = 0.0000000045f;
-
-//     float diff = fabs(slope_pt_to_view - slope_check_pt_to_pt);
-
-//     bool temp = (diff < delta);
-//     // printf("Difference: %f\n", diff);
-//     // printf("Boolean: %d\n", temp);
-
-//     //printf("Difference: %f\n", diff);
-//     // If they are equal return true
-//     return temp;
-// }
-
 // calculating distance between two points in  3d space
 float distance(float x1, float y1, float z1, float x2, float y2, float z2){
 
@@ -160,14 +70,14 @@ float distance(float x1, float y1, float z1, float x2, float y2, float z2){
 // arg1: Passed in a pose that represents a point in space
 // arg2: the point cloud object of the pcd file
 
-// PENDING: consider orientation (various angles for a given point) when viewing the object
-void findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::ConstPtr& msg)
+finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::ConstPtr& msg, int filteredObjectCounter)
 {
 
-
-
+    // the final object to return
+    finalFilteredCloud ret;
+    ret.viewedFrom = createdPoint;
     // printing the current view point
-    printf("Coordinates: %f, %f, %f\n", createdPoint.position.x, createdPoint.position.y, createdPoint.position.z);
+    //printf("Coordinates: %f, %f, %f\n", createdPoint.position.x, createdPoint.position.y, createdPoint.position.z);
 
     // x,y,z represents the cooridnates of the view 
     float x = createdPoint.position.x;
@@ -220,9 +130,9 @@ void findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::ConstP
         float vertical_slope = calculate_2d_slope(y, z, pt.y, pt.z);
         if (vertical_slope >= min_y_slope && vertical_slope <= max_y_slope) {
             // calculate the angle between the camera and the point in question
-            angle = calculate_angle(x, z, pt.x, pt.z);
+            double angle = calculate_angle(x, z, pt.x, pt.z);
             // if it is within the horizontal view range of the camera, proceed, otherwise stop
-            if (abs(angle) <= 60) {
+            //if (abs(angle) <= 60) {
 
                 float slope_pt_to_view = round(calculate_slope(x, y, z, pt.x, pt.y, pt.z) * 100000.0) / 100000.0 ;
                 it = viewablePoints.find(slope_pt_to_view);
@@ -254,7 +164,7 @@ void findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::ConstP
                     newPose.position.z = pt.z;
                     viewablePoints.insert(std::pair<float, geometry_msgs::Pose> (slope_pt_to_view, newPose));
                 }
-            }
+            //}
         }
         size++; // totalNum points
 
@@ -280,7 +190,11 @@ void findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::ConstP
 
     // publishing data set
     ros::NodeHandle nh;
-    ros::Publisher pub = nh.advertise<PointCloud> ("fileredCloud", 1);
+
+    // ERROR HERE!!
+    //string publishTopic = "filteredCloud_" + filteredObjectCounter;
+    string publishTopic = "filteredCloud";
+    ros::Publisher pub = nh.advertise<PointCloud> (publishTopic, 1);
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud (new pcl::PointCloud<pcl::PointXYZ>);
 
@@ -301,72 +215,27 @@ void findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::ConstP
 
     }
 
+    // CODE TO PUBLISH THE FILTERED CLOUDS - USE LATER 
     // publishing to rviz topic
     // currently infinite
-    ros::Rate loop_rate(4);
-    while (nh.ok()) {
-        filteredCloud->header.stamp = ros::Time::now().toNSec();
-        pub.publish (filteredCloud);
+    // ros::Rate loop_rate(4);
+    // while (nh.ok()) {
+    //     pub.publish (filteredCloud);
 
-        printf("view coordinates: %f, %f, %f - viewable: %f\n", x,y,z, 100 * viewablePoints.size() / (float) (size));
-        ros::spinOnce ();
-        loop_rate.sleep ();
-    }
+    //     printf("view coordinates: %f, %f, %f - viewable: %f\n", x,y,z, 100 * viewablePoints.size() / (float) (size));
+    //     ros::spinOnce ();
+    //     loop_rate.sleep ();
+    // }
 
-    // for modularity, break into separate methods
-    // publishData(filteredCloud, viewablePoints);
-
-
-
+    // return a new object that represents the cloud to be published
+    // along with other information that may be useful
+    // to add more useful features, change the struct above and the .h file
+    
+    ret.cloud = filteredCloud;
+    ret.percentageViewed = viewablePoints.size() / size;
+    return ret;
 
     //float viewableAmount = 
     //return viewableAmount; // percentag of points viewed
-
-
-
-
-    // old implementation!
-
-    // traverse through points of the point cloud
-    // for a given point we scan all the same points
-    // for each pair of points, we check if they have the same slope or comparable slopes
-    // if they are similar we discount this because we have seen this point before
-    // by this way we count all the points, without duplicates
-    // by doing numberInLine <=1 we make sure we count only unique points and not duplicates
-    // BOOST_FOREACH (const pcl::PointXYZ& pt, msg->points) {
-    //     int numberInLine = 0;
-    //     BOOST_FOREACH (const pcl::PointXYZ& pt2, msg->points) {
-    //         bool onTheLine = onLine(x, y, z, pt.x, pt.y, pt.z, pt2.x, pt2.y, pt2.z);
-    //         if (onTheLine) {
-    //             numberInLine++;
-    //         }
-    //     }
-    //     // printf("inView: %d\n", inView);
-    //     if (numberInLine <= 1) {
-    //         count++;
-    //     }
-    //     size++;
-    // }
-
-    // // printf("Count: %d\n", count);
-    // // printf("Size: %d\n", size);
-
-    // //printf("Percent of points viewed from pose: %f\n", 100 * count/(float)size);
-
-    // // finally return a ratio of the points seen to the total number of points 
-    // // in the pcl 
-    // return (100 * count / (float) (size));
 }
 
-// void callback(const PointCloud::ConstPtr& msg)
-// {
-//     // printf("Percent of points viewed: %f\n", findPoints(msg));
-// }
-
-// int main(int argc, char** argv)
-// {
-//     ros::init(argc, argv, "generate_views");
-//     ros::NodeHandle nh;
-//     ros::Subscriber sub = nh.subscribe<PointCloud>("cloud", 1, callback);
-//     ros::spin();
-// }

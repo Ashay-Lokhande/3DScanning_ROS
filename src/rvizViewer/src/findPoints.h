@@ -8,8 +8,17 @@
 #include <math.h>
 #include <geometry_msgs/Pose.h>
 
+struct finalFilteredCloud {
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
+    geometry_msgs::Pose viewedFrom;
+    double percentageViewed;
+
+};
+
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
-float findPoints(const geometry_msgs::Pose, const PointCloud::ConstPtr&);
-
+/*pcl::PointCloud<pcl::PointXYZ>::Ptr findPoints(const geometry_msgs::Pose, const PointCloud::ConstPtr&);
+*/
+finalFilteredCloud findPoints(const geometry_msgs::Pose, const PointCloud::ConstPtr&, int filteredObjectCounter);
 #endif /* FINDPOINTS_H */

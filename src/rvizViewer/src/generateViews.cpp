@@ -49,6 +49,7 @@
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
+using namespace std;
 #define PI 3.141592653589793238462643383279502884197169
 #define CAMERA_HEIGHT 0;
 
@@ -94,15 +95,8 @@ void callback(const PointCloud::ConstPtr& msg)
 		*/
 
         // vector used to collect all the filtered clouds, we will develop most efficienct sets from this list of filetered clouds
-
-        //std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> filteredObjects;
-
         std::vector<finalFilteredCloud> filteredObjects;
 
-        // counter is used for publishing purposes
-        // we dont want to publish a cloud to a given topic and then overwrite
-        // that with another
-        int filteredObjectCounter = 0;
     	//Finds the points of the circle around the center of the object	
     	for (float theta = 0; theta < 2*PI; theta += 0.175){
     		float x = circle_radius * (float) cos(theta);
@@ -126,8 +120,7 @@ void callback(const PointCloud::ConstPtr& msg)
     			new_coordinate_pose.push_back(viewPoint);
 
                 // filtering out the cloud based on input and collecting all those point clouds
-                filteredObjects.push_back(findPoints(viewPoint, msg, filteredObjectCounter));
-                filteredObjectCounter++;
+                filteredObjects.push_back(findPoints(viewPoint, msg));
 
                 //printf ("Percent of object viewed is: %f\n", findPoints(viewPoint, msg));
     		}
@@ -135,8 +128,26 @@ void callback(const PointCloud::ConstPtr& msg)
     		pose_2Dcontainer.push_back(new_coordinate_pose);
     	}
 
+
         // at this point we want to visualize the filteredClouds produced and the viewPoint that generated them.
-        printf("collected clouds: %d\n", filteredObjects.size()); 
+
+        // publish the data collected
+        // go through the filtered objects and publish them accordingly
+        // ERROR HERE!! problem is that a topic must contain only characters from a-z and A-Z, so it is hard to make something unique because number not allowed
+        ros::NodeHandle nh;
+        for (std::vector<finalFilteredCloud>::iterator it = filteredObjects.begin() ; it != filteredObjects.end(); ++it){
+            printf("publishing!\n");
+            string publishTopic = "filteredCloud";
+            ros::Publisher pub = nh.advertise<PointCloud> (publishTopic, 1);
+            pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud = (*it).cloud;
+            ros::Rate loop_rate(4);
+            while (nh.ok()) {
+                pub.publish (filteredCloud);
+
+                ros::spinOnce ();
+                loop_rate.sleep ();
+            }
+        }
 
     	first_time = true;
     }

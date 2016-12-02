@@ -18,7 +18,5 @@ struct finalFilteredCloud {
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
-/*pcl::PointCloud<pcl::PointXYZ>::Ptr findPoints(const geometry_msgs::Pose, const PointCloud::ConstPtr&);
-*/
-finalFilteredCloud findPoints(const geometry_msgs::Pose, const PointCloud::ConstPtr&, int filteredObjectCounter);
+finalFilteredCloud findPoints(const geometry_msgs::Pose, const PointCloud::ConstPtr&);
 #endif /* FINDPOINTS_H */

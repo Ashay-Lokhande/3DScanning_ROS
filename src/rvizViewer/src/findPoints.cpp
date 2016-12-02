@@ -25,6 +25,9 @@ typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 #define PI 3.141592653589793238462643383279502884197169
 
 
+// struct to represent information of the filtered cloud
+// consists of filtered cloud and other useful information
+// to add more useful features change it below and in the .h file
 struct finalFilteredCloud {
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
@@ -69,8 +72,7 @@ float distance(float x1, float y1, float z1, float x2, float y2, float z2){
 // method to find viewable points from a given view. 
 // arg1: Passed in a pose that represents a point in space
 // arg2: the point cloud object of the pcd file
-
-finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::ConstPtr& msg, int filteredObjectCounter)
+finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::ConstPtr& msg)
 {
 
     // the final object to return
@@ -188,19 +190,11 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
     // refer: http://wiki.ros.org/pcl_ros
     // refer: http://pointclouds.org/documentation/tutorials/passthrough.php
 
-    // publishing data set
-    ros::NodeHandle nh;
-
-    // ERROR HERE!!
-    //string publishTopic = "filteredCloud_" + filteredObjectCounter;
-    string publishTopic = "filteredCloud";
-    ros::Publisher pub = nh.advertise<PointCloud> (publishTopic, 1);
-
     pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud (new pcl::PointCloud<pcl::PointXYZ>);
 
     filteredCloud->width = viewablePoints.size(); // need to verify
     filteredCloud->height = 1;
-    filteredCloud->points.resize(filteredCloud->width * filteredCloud->height);
+    filteredCloud->points.resize(filteredCloud->width * filteredCloud->height); 
     filteredCloud->header.frame_id = "/map";
     int filterIndex = 0;
 
@@ -214,19 +208,6 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
     	filteredCloud->points[filterIndex].z = it->second.position.z;
 
     }
-
-    // CODE TO PUBLISH THE FILTERED CLOUDS - USE LATER 
-    // publishing to rviz topic
-    // currently infinite
-    // ros::Rate loop_rate(4);
-    // while (nh.ok()) {
-    //     pub.publish (filteredCloud);
-
-    //     printf("view coordinates: %f, %f, %f - viewable: %f\n", x,y,z, 100 * viewablePoints.size() / (float) (size));
-    //     ros::spinOnce ();
-    //     loop_rate.sleep ();
-    // }
-
     // return a new object that represents the cloud to be published
     // along with other information that may be useful
     // to add more useful features, change the struct above and the .h file

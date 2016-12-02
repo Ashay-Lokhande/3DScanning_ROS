@@ -165,6 +165,7 @@ void findPoints(const geometry_msgs::Pose createdPoint, const PointCloud::ConstP
 {
 
 
+
     // printing the current view point
     printf("Coordinates: %f, %f, %f\n", createdPoint.position.x, createdPoint.position.y, createdPoint.position.z);
 

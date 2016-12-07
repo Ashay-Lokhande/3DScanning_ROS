@@ -54,7 +54,7 @@ using namespace std;
 #define CAMERA_HEIGHT 0;
 
 //count is a varuiable used to make sure that the node only generates the poses once
-bool first_time = false;
+bool first_time = true;
 //A two dimensional vector used to hold the poses generated around the object
 std::vector<std::vector<geometry_msgs::Pose> > pose_2Dcontainer;
 
@@ -63,7 +63,7 @@ geometry_msgs::Point center;
 void callback(const PointCloud::ConstPtr& msg)
 {
     
-    if(!first_time)
+    if(first_time)
     {
     	float numPoints = 0;
     	//printf ("Cloud: width = %d, height = %d\n", msg->width, msg->height);
@@ -121,12 +121,12 @@ void callback(const PointCloud::ConstPtr& msg)
 
                 // filtering out the cloud based on input and collecting all those point clouds
                 filteredObjects.push_back(findPoints(viewPoint, msg));
-
                 //printf ("Percent of object viewed is: %f\n", findPoints(viewPoint, msg));
     		}
     		//Add the vector of poses containing the same position but different orientations
     		pose_2Dcontainer.push_back(new_coordinate_pose);
     	}
+        printf("IM FINISHED WITH THE FOR LOOP (GENERATEVIEWS)\n");
 
 
         // at this point we want to visualize the filteredClouds produced and the viewPoint that generated them.
@@ -140,33 +140,35 @@ void callback(const PointCloud::ConstPtr& msg)
         int i = 0;
         int minI = 0;
         int maxI = 0;
-        float min = 101;
-        float max = -1;
+        double min = 101;
+        double max = -1;
         ros::NodeHandle nh;
+        finalFilteredCloud maxViewable; // NULL
         for (std::vector<finalFilteredCloud>::iterator it = filteredObjects.begin() ; it != filteredObjects.end(); ++it){
-            if((*it).percentageViewed > max){
-                min = (*it).percentageViewed;
-                minI = i;
-                maxI = i;
-
+            if ((*it).percentageViewed > max){
+                maxViewable = (*it);
+                max = (*it).percentageViewed;
             }
-            i++;
-            //printf("Viewed from %f, %f, %f and Percentage %f\n", (*it).viewedFrom.position.x, (*it).viewedFrom.position.y, (*it).viewedFrom.position.z, (*it).percentageViewed);
+            // printf("Viewed from %f, %f, %f and Percentage %f\n", (*it).viewedFrom.position.x, (*it).viewedFrom.position.y, (*it).viewedFrom.position.z, (*it).percentageViewed);
         }
 
-            string publishTopic = "filteredCloud";
-            ros::Publisher pub = nh.advertise<PointCloud> (publishTopic, 1);
-            pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud = filteredObjects.at(maxI).cloud; 
-            //= (*it).cloud;
-            printf("percentage viewed!!!!!: %f\n", filteredObjects.at(maxI).percentageViewed);
-            ros::Rate loop_rate(4);
-            while (nh.ok()) {
-                pub.publish (filteredCloud);
-                ros::spinOnce ();
-                loop_rate.sleep ();
-            }
-
-    	first_time = true;
+        string publishTopic = "filteredCloud";
+        ros::Publisher pub = nh.advertise<PointCloud> (publishTopic, 1);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud = maxViewable.cloud;
+        //filteredObjects.at(maxI).cloud; 
+        //= (*it).cloud;
+        printf("viewed from (%f, %f, %f) - percentage viewed!: %f\n", 
+                maxViewable.viewedFrom.position.x,
+                maxViewable.viewedFrom.position.y,
+                maxViewable.viewedFrom.position.z,
+                maxViewable.percentageViewed);
+        first_time = false;
+        ros::Rate loop_rate(4);
+        while (nh.ok()) {
+            pub.publish (filteredCloud);
+            ros::spinOnce ();
+            loop_rate.sleep ();
+        }
     }
     
     //ROS_INFO("Center x = %f,  y = %f,  z = %f \n", center.x, center.y, center.z);

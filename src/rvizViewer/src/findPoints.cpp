@@ -217,8 +217,8 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
     
     ret.cloud = filteredCloud;
     ret.percentageViewed = 100 * viewablePoints.size() / (float) size;
-    printf("percentage viewed from: (%f, %f, %f) (from findpoints): %f\n", ret.viewedFrom.position.x, 
-         ret.viewedFrom.position.y,  ret.viewedFrom.position.z, ret.percentageViewed);
+    //printf("percentage viewed from: (%f, %f, %f) (from findpoints): %f\n", ret.viewedFrom.position.x, 
+         // ret.viewedFrom.position.y,  ret.viewedFrom.position.z, ret.percentageViewed);
     return ret;
 
     //float viewableAmount = 

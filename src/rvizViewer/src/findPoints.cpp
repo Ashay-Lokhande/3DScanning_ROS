@@ -77,14 +77,16 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
 
     // the final object to return
     finalFilteredCloud ret;
-    ret.viewedFrom = createdPoint;
     // printing the current view point
     //printf("Coordinates: %f, %f, %f\n", createdPoint.position.x, createdPoint.position.y, createdPoint.position.z);
 
     // x,y,z represents the cooridnates of the view 
-    float x = createdPoint.position.x;
-    float y = createdPoint.position.y;
-    float z = createdPoint.position.z;
+    float x = (createdPoint.position.x) / (float) 250.0;
+    float y = (createdPoint.position.y) / (float) 250.0;
+    float z = (createdPoint.position.z) / (float) 250.0;
+    ret.viewedFrom.position.x = x;
+    ret.viewedFrom.position.y = y;
+    ret.viewedFrom.position.z = z;
 
     // pitch_angle and theta represent the angles relative to the view
     // pitch_angle is the rotation of the camera
@@ -98,20 +100,20 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
     float max_y_slope, min_y_slope;
 
     if (pitch_angle = 30) {
-        max_y_slope = 1.73;
-        min_y_slope = 0;
+        max_y_slope = -1.732;
+        min_y_slope = -9;
     } else if (pitch_angle = 60) {
-        max_y_slope = 9;
-        min_y_slope = 0.577;
+        max_y_slope = -0.577;
+        min_y_slope = -1.732;
     } else if (pitch_angle = 90) {
-        max_y_slope = 1.73;
-        min_y_slope = -1.73;
-    } else if (pitch_angle = 120) {
-        max_y_slope = 9;
-        min_y_slope = -0.577;
-    } else if (pitch_angle = 150) {
         max_y_slope = 0;
-        min_y_slope = -1.73;
+        min_y_slope = -0.577;
+    } else if (pitch_angle = 120) {
+        max_y_slope = 0.577;
+        min_y_slope = 0;
+    } else if (pitch_angle = 150) {
+        max_y_slope = 1.732;
+        min_y_slope = 0.577;
     }
 
     // total number of points in the point cloud
@@ -130,11 +132,11 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
         // ensures that the point in question is within the camera viewpoint (using the physical slopes calculated above)
         // I am assuming that vertical slope is a calculation of the y and z coordinates
         float vertical_slope = calculate_2d_slope(y, z, pt.y, pt.z);
-        if (vertical_slope >= min_y_slope && vertical_slope <= max_y_slope) {
+        if (vertical_slope >= min_y_slope) {
             // calculate the angle between the camera and the point in question
             double angle = calculate_angle(x, z, pt.x, pt.z);
             // if it is within the horizontal view range of the camera, proceed, otherwise stop
-            //if (abs(angle) <= 60) {
+            if (abs(angle) <= 60) {
 
                 float slope_pt_to_view = round(calculate_slope(x, y, z, pt.x, pt.y, pt.z) * 100000.0) / 100000.0 ;
                 it = viewablePoints.find(slope_pt_to_view);
@@ -166,12 +168,11 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
                     newPose.position.z = pt.z;
                     viewablePoints.insert(std::pair<float, geometry_msgs::Pose> (slope_pt_to_view, newPose));
                 }
-            //}
+            }
         }
         size++; // totalNum points
 
     }
-
 
 
     // displaying contents of the map
@@ -211,9 +212,13 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
     // return a new object that represents the cloud to be published
     // along with other information that may be useful
     // to add more useful features, change the struct above and the .h file
+
+
     
     ret.cloud = filteredCloud;
-    ret.percentageViewed = viewablePoints.size() / size;
+    ret.percentageViewed = 100 * viewablePoints.size() / (float) size;
+    printf("percentage viewed from: (%f, %f, %f) (from findpoints): %f\n", ret.viewedFrom.position.x, 
+         ret.viewedFrom.position.y,  ret.viewedFrom.position.z, ret.percentageViewed);
     return ret;
 
     //float viewableAmount = 

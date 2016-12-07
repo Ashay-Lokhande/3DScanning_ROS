@@ -134,20 +134,37 @@ void callback(const PointCloud::ConstPtr& msg)
         // publish the data collected
         // go through the filtered objects and publish them accordingly
         // ERROR HERE!! problem is that a topic must contain only characters from a-z and A-Z, so it is hard to make something unique because number not allowed
+        
+        // below code for testing purposes
+        // refactor to print all the filtered point clouds
+        int i = 0;
+        int minI = 0;
+        int maxI = 0;
+        float min = 101;
+        float max = -1;
         ros::NodeHandle nh;
         for (std::vector<finalFilteredCloud>::iterator it = filteredObjects.begin() ; it != filteredObjects.end(); ++it){
-            printf("publishing!\n");
+            if((*it).percentageViewed > max){
+                min = (*it).percentageViewed;
+                minI = i;
+                maxI = i;
+
+            }
+            i++;
+            //printf("Viewed from %f, %f, %f and Percentage %f\n", (*it).viewedFrom.position.x, (*it).viewedFrom.position.y, (*it).viewedFrom.position.z, (*it).percentageViewed);
+        }
+
             string publishTopic = "filteredCloud";
             ros::Publisher pub = nh.advertise<PointCloud> (publishTopic, 1);
-            pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud = (*it).cloud;
+            pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud = filteredObjects.at(maxI).cloud; 
+            //= (*it).cloud;
+            printf("percentage viewed!!!!!: %f\n", filteredObjects.at(maxI).percentageViewed);
             ros::Rate loop_rate(4);
             while (nh.ok()) {
                 pub.publish (filteredCloud);
-
                 ros::spinOnce ();
                 loop_rate.sleep ();
             }
-        }
 
     	first_time = true;
     }

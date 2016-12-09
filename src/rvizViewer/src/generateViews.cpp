@@ -49,7 +49,7 @@ typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 #define CAMERA_HEIGHT 0;
 
 //count is a varuiable used to make sure that the node only generates the poses once
-bool first_time = false;
+bool first_time = true;
 //A two dimensional vector used to hold the poses generated around the object
 std::vector<std::vector<geometry_msgs::Pose> > pose_2Dcontainer;
 
@@ -58,7 +58,7 @@ geometry_msgs::Point center;
 void callback(const PointCloud::ConstPtr& msg)
 {
     
-    if(!first_time)
+    if(first_time)
     {
     	int i = 0, j = 0;
         float numPoints = 0;
@@ -150,7 +150,7 @@ void callback(const PointCloud::ConstPtr& msg)
             //printf("\n");
         }	            
 
-    	first_time = true;
+    	first_time = false;
     }
     
     //ROS_INFO("Center x = %f,  y = %f,  z = %f \n", center.x, center.y, center.z);

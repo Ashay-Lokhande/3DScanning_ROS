@@ -40,12 +40,14 @@
 #include <ros/package.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Point.h>
+#include <geometry_msgs/PoseStamped.h>
 #include "findPoints.h"
 #include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/publisher.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <tf/tf.h>
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
@@ -69,12 +71,22 @@ void callback(const PointCloud::ConstPtr& msg)
     	//printf ("Cloud: width = %d, height = %d\n", msg->width, msg->height);
 
     	/*The radius of the hypothetical circle around teh center of the point cloud where
-		  generate our poses															*/
-    	float circle_radius = (msg->width * 1.5);
+		  generate our poses										*/
+
+    	float dist_circle_center, max_x, min_x, max_y, min_y;
     	
     	//Finds the center of the PointCloud
     	BOOST_FOREACH (const pcl::PointXYZ& pt, msg->points)
     	{
+    		if(pt.x > max_x)
+    			max_x = pt.x;
+    		else if(pt.x < min_x)
+    			min_x = pt.x;
+    		if(pt.y > max_y)
+    			max_y = pt.y;
+    		else if(pt.y < min_y)
+    			min_y = pt.y;
+
     		center.x += pt.x;
     		center.y += pt.y;
     		center.z += pt.z;
@@ -83,7 +95,10 @@ void callback(const PointCloud::ConstPtr& msg)
     		center.x /= numPoints;
     		center.y /= numPoints;
     		center.z /= numPoints;
-    
+    		if((max_x - min_x) > (max_y - min_y))
+    			dist_circle_center = (max_x - min_x) * 1.5;
+    		else
+    			dist_circle_center = (max_y - min_y) * 1.5;
     	/*
     	Looping structure to create the poses and load them into a two dimmensional list
 					GENERATING THE POSES												
@@ -99,20 +114,21 @@ void callback(const PointCloud::ConstPtr& msg)
 
     	//Finds the points of the circle around the center of the object	
     	for (float theta = 0; theta < 2*PI; theta += 0.175){
-    		float x = circle_radius * (float) cos(theta);
-    		float y = circle_radius * (float) sin(theta);
+    		const float buffer_Dist = 5; //this value is used to give a bsae distance of the circle from the object
+    		float x = (buffer_Dist + dist_circle_center) * (float) cos(theta);
+    		float y = (buffer_Dist+ dist_circle_center) * (float) sin(theta);
+    		float yaw =  PI + theta; // (float) sin(.5 * theta);
     		std::vector<geometry_msgs::Pose> new_coordinate_pose;
+
     		//for loop for the 5 different orientations of the poses
-    		for(float pitch_angle = 30; pitch_angle <= 150; pitch_angle += 30){
+    		for(float pitch_angle = -(2 * PI) / 6; pitch_angle <= (2 * PI) / 6; pitch_angle += PI / 6){
     			geometry_msgs::Pose viewPoint;
+    			float pitch = (PI / 2) + pitch_angle;// (float) sin(.5 * pitch_angle);
     			viewPoint.position.x = x;
     			viewPoint.position.y = y;
     			viewPoint.position.z = CAMERA_HEIGHT;
-    			viewPoint.orientation.w = 0;
-    			viewPoint.orientation.x = 0;
-    			viewPoint.orientation.y = (float) sin(.5 * pitch_angle);
-    			viewPoint.orientation.z = (float) sin(.5 * theta); //replace with degree change to look at the center
-
+    			viewPoint.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, pitch, yaw);
+    			
                 // below there is a one to one correspondence between a viewPoint and the filteredObject produced.
                 // in other words, the viewPoint at new_coordinate_pose.get(i) produced the filteredCloud at filteredObjects.get(i)
 
@@ -149,34 +165,41 @@ void callback(const PointCloud::ConstPtr& msg)
                 maxViewable = (*it);
                 max = (*it).percentageViewed;
             }
-            // printf("Viewed from %f, %f, %f and Percentage %f\n", (*it).viewedFrom.position.x, (*it).viewedFrom.position.y, (*it).viewedFrom.position.z, (*it).percentageViewed);
         }
 
-        string publishTopic = "filteredCloud";
-        ros::Publisher pub = nh.advertise<PointCloud> (publishTopic, 1);
+        string publishTopicFilteredCloud = "filteredCloud";
+        string publicTopicViewablePoint = "viewedFrom";
+        // getting ready to advertise the filtered point cloud
+        ros::Publisher cloudPub = nh.advertise<PointCloud> (publishTopicFilteredCloud, 1);
+
+        // getting ready to advertise the view point
+        ros::Publisher viewPointPub = nh.advertise<geometry_msgs::PoseStamped> (publicTopicViewablePoint, 1);
+        // setting up PoseStamped object to publish
+        geometry_msgs::PoseStamped publishedPoint;
+        publishedPoint.header.frame_id = "/map";
+        publishedPoint.pose = maxViewable.viewedFrom;
+
         pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud = maxViewable.cloud;
-        //filteredObjects.at(maxI).cloud; 
-        //= (*it).cloud;
+
         printf("viewed from (%f, %f, %f) - percentage viewed!: %f\n", 
                 maxViewable.viewedFrom.position.x,
                 maxViewable.viewedFrom.position.y,
                 maxViewable.viewedFrom.position.z,
                 maxViewable.percentageViewed);
+
         first_time = false;
         ros::Rate loop_rate(4);
         while (nh.ok()) {
-            pub.publish (filteredCloud);
+        	// publish it -> the filtered point cloud and where it was a viewed
+            cloudPub.publish (filteredCloud);
+            viewPointPub.publish(publishedPoint);
+       //     printf("The Quaternion is: x = %f, y = %f, z = %f, w = %f \n", 
+       //     	publishedPoint.pose.orientation.x, publishedPoint.pose.orientation.y,
+       //     	publishedPoint.pose.orientation.z, publishedPoint.pose.orientation.w);
             ros::spinOnce ();
             loop_rate.sleep ();
         }
     }
-    
-    //ROS_INFO("Center x = %f,  y = %f,  z = %f \n", center.x, center.y, center.z);
-
-    /*
-    BOOST_FOREACH (const pcl::PointXYZ& pt, msg->points)
-        printf ("\t(%f, %f, %f)\n", pt.x, pt.y, pt.z);
-    */
 }
 
 int main(int argc, char** argv)

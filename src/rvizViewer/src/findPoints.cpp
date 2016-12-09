@@ -24,6 +24,11 @@ using namespace std;
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 #define PI 3.141592653589793238462643383279502884197169
 
+// This angle is equal to the range(in radians) that the camera can see vertcally up and down
+#define camera_pitch_angle_range PI / 3
+// This angle is equal to the range(in radians) that the camera can see horiziontally
+#define camera_yaw_angle_range PI / 3
+
 
 // struct to represent information of the filtered cloud
 // consists of filtered cloud and other useful information
@@ -58,8 +63,7 @@ float calculate_2d_slope (float x, float y, float pt_x, float pt_y)
 float calculate_angle (float x, float z, float pt_x, float pt_z)
 {
     float angle = atan2(pt_z - z, pt_x - x);
-    float degrees = angle * 180 / PI;
-    return degrees;
+    return angle;
 }
 
 // calculating distance between two points in  3d space
@@ -67,6 +71,20 @@ float distance(float x1, float y1, float z1, float x2, float y2, float z2){
 
     return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2) + pow(z1 - z2, 2));
 }
+
+
+float getPitch(const geometry_msgs::Quaternion qt) {
+  return atan2(2*(qt.y*qt.z + qt.w*qt.x), qt.w*qt.w - qt.x*qt.x - qt.y*qt.y + qt.z*qt.z);
+}
+
+float getYaw(const geometry_msgs::Quaternion qt){
+  return asin(-2*(qt.x*qt.z - qt.w*qt.y));
+}
+
+float getRoll(const geometry_msgs::Quaternion qt) {
+  return atan2(2*(qt.x*qt.y + qt.w*qt.z), qt.w*qt.w + qt.x*qt.x - qt.y*qt.y - qt.z*qt.z);
+}
+
 
 
 // method to find viewable points from a given view. 
@@ -81,40 +99,58 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
     //printf("Coordinates: %f, %f, %f\n", createdPoint.position.x, createdPoint.position.y, createdPoint.position.z);
 
     // x,y,z represents the cooridnates of the view 
-    float x = (createdPoint.position.x) / (float) 250.0;
-    float y = (createdPoint.position.y) / (float) 250.0;
-    float z = (createdPoint.position.z) / (float) 250.0;
+    float x = (createdPoint.position.x) ;// / (float) 250.0;
+    float y = (createdPoint.position.y) ;// / (float) 250.0;
+    float z = (createdPoint.position.z) ;// / (float) 250.0;
     ret.viewedFrom.position.x = x;
     ret.viewedFrom.position.y = y;
     ret.viewedFrom.position.z = z;
+    ret.viewedFrom.orientation.x = createdPoint.orientation.x;
+    ret.viewedFrom.orientation.y = createdPoint.orientation.y;
+    ret.viewedFrom.orientation.z = createdPoint.orientation.z;
+    ret.viewedFrom.orientation.w = createdPoint.orientation.w;  
 
     // pitch_angle and theta represent the angles relative to the view
     // pitch_angle is the rotation of the camera
     // theta is the rotation of the robot relative to the center
-    float pitch_angle = (float) (2 * asin(createdPoint.orientation.y));
-    float theta = (float) (2 * asin(createdPoint.orientation.z));
+
+    float pitch = getPitch(createdPoint.orientation);
+    float yaw = getYaw(createdPoint.orientation);
+
+    printf("pitch_angle %f \n", pitch);
 
     // figure out the max slope and min slope on the y, z plane
     // given a specific camera pitch angle - this will help limit which points should be considered viewable
     // assuming a 60 degree camera viewfinder (vertically)
-    float max_y_slope, min_y_slope;
+    float max_slope, min_slope;
 
-    if (pitch_angle = 30) {
+    max_slope = tan(pitch + (camera_pitch_angle_range / 2));
+    min_slope = tan(pitch - (camera_pitch_angle_range / 2));
+
+   
+
+   /*
+    if (pitch_angle = -(2 * PI) / 6) {
         max_y_slope = -1.732;
         min_y_slope = -9;
-    } else if (pitch_angle = 60) {
+        printf("Triggered 1\n");
+    } else if (pitch_angle = -(PI) / 6) {
         max_y_slope = -0.577;
         min_y_slope = -1.732;
-    } else if (pitch_angle = 90) {
+        printf("Triggered 2\n");
+    } else if (pitch_angle = 0) {
         max_y_slope = 0;
         min_y_slope = -0.577;
-    } else if (pitch_angle = 120) {
+        printf("Triggered 3\n");
+    } else if (pitch_angle = PI / 6) {
         max_y_slope = 0.577;
         min_y_slope = 0;
-    } else if (pitch_angle = 150) {
+        printf("Triggered 4\n");
+    } else if (pitch_angle = (2 * PI) / 6) {
         max_y_slope = 1.732;
         min_y_slope = 0.577;
-    }
+        printf("Triggered 5\n");
+    } */
 
     // total number of points in the point cloud
     int size = 0;
@@ -131,12 +167,15 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
     BOOST_FOREACH (const pcl::PointXYZ& pt, msg->points) {
         // ensures that the point in question is within the camera viewpoint (using the physical slopes calculated above)
         // I am assuming that vertical slope is a calculation of the y and z coordinates
-        float vertical_slope = calculate_2d_slope(y, z, pt.y, pt.z);
-        if (vertical_slope >= min_y_slope) {
+        float vertical_slope = calculate_slope(x, y, z, pt.x, pt.y, pt.z);
+        if (vertical_slope >= min_slope && vertical_slope <= max_slope) {
             // calculate the angle between the camera and the point in question
-            double angle = calculate_angle(x, z, pt.x, pt.z);
+            double angle = calculate_angle(x, y, pt.x, pt.y);
             // if it is within the horizontal view range of the camera, proceed, otherwise stop
-            if (abs(angle) <= 60) {
+            if (angle <= (yaw / 2) + camera_yaw_angle_range && 
+                    angle >= (yaw / 2) - camera_yaw_angle_range
+                    //abs(angle) <= yaw / 2
+                ){
 
                 float slope_pt_to_view = round(calculate_slope(x, y, z, pt.x, pt.y, pt.z) * 100000.0) / 100000.0 ;
                 it = viewablePoints.find(slope_pt_to_view);

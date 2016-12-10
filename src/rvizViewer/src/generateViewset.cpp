@@ -29,27 +29,31 @@
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 typedef std::vector<std::vector<bool>> booleanMatrix;
-typedef std::vector<std::vector<pose_object>> pose_obj_array;
-typedef std::std::vector<pose_object> Pose_Set;
+typedef std::vector<std::vector<finalFilteredCloud> > view_info_array;
+typedef std::map<int, point_viewed> boolean_point_info ;
 
 void callback(const PointCloud::ConstPtr& msg)
 {
     // Calls generate views and expects all pose object info returned
-    pose_obj_array views = generate_views();
+    view_info_array views = generate_views();
 
-    //Create Initial Viewsets Based on the starting position
-    
-    viewSet_object first;
-    viewSet_object second;
-    viewSet_object third;
-    viewSet_object fourth;
-    viewSet_object fifth;
+    //Create Initial Viewsets Based on the starting position for each orientation of the pose
+    viewSet_object[5] viewSets;
 
-    for(std::vector<pose_object> current_array: pose_obj_array;)
+    for(int i = 0; i < 5; i++)
     {
+        viewSets[index] = new viewSet_object(views.at(0).at(index));
 
+        while(viewSets[index].total_percent <= 95.0)
+        {
+            finalFilteredCloud best_struct;
+            
+            for(std::vector<pose_object> current_array: pose_obj_array;)
+            {
+
+            }
+        }
     }
-
 
     //ROS_INFO("Center x = %f,  y = %f,  z = %f \n", center.x, center.y, center.z);
 

@@ -4,7 +4,8 @@
 
 #include "Pose_Object.h"
 // ttps://mirror.umd.edu/roswiki/doc/diamondback/api/geometry_msgs/html/msg/PoseArray.html
-#include <geometry_msgs/PoseArray.h>
+// #include <geometry_msgs/PoseArray.h>
+#include "findPoints.h"
 
 std::map<int, point_viewed> boolean_struct;
 

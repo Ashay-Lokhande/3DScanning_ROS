@@ -50,8 +50,6 @@
      {
 
      }
-
-
      //ROS_INFO("Center x = %f,  y = %f,  z = %f \n", center.x, center.y, center.z);
 
      /*

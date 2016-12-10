@@ -62,12 +62,11 @@ bool first_time = true;
 std::vector<std::vector<finalFilteredCloud> > all_view_information;
 
 geometry_msgs::Point center;
-
-void callback(const PointCloud::ConstPtr& msg)
+std::vector<std::vector<finalFilteredCloud> > generateViews(const PointCloud::ConstPtr& msg)
 {
     
-    if(first_time)
-    {
+    // if(first_time)
+    // {
     	float numPoints = 0;
     	//printf ("Cloud: width = %d, height = %d\n", msg->width, msg->height);
 
@@ -145,7 +144,12 @@ void callback(const PointCloud::ConstPtr& msg)
     		//pose_2Dcontainer.push_back(new_coordinate_pose);
             all_view_information.push_back(filteredObjects);
     	}
+
+        return all_view_information;
+
+        /*
         printf("IM FINISHED WITH THE FOR LOOP (GENERATEVIEWS)\n");
+
 
 
         // at this point we want to visualize the filteredClouds produced and the viewPoint that generated them.
@@ -204,6 +208,7 @@ void callback(const PointCloud::ConstPtr& msg)
             loop_rate.sleep ();
         }
     }
+    */
 }
 
 int main(int argc, char** argv)
@@ -211,7 +216,7 @@ int main(int argc, char** argv)
     //Subscriber 
     ros::init(argc, argv, "generate_views");
     ros::NodeHandle nh;
-    ros::Subscriber sub = nh.subscribe<PointCloud>("cloud", 1, callback);
+    // ros::Subscriber sub = nh.subscribe<PointCloud>("cloud", 1, callback);
     ros:: spin();
 
 /*

@@ -139,8 +139,11 @@ target_link_libraries(rvizView ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 #add_executable(findPoints src/findPoints.cpp)
 #target_link_libraries(findPoints ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
-add_executable(generateViews src/generateViews.cpp src/findPoints.cpp)
-target_link_libraries(generateViews ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+#add_executable(generateViews src/generateViews.cpp src/findPoints.cpp)
+#target_link_libraries(generateViews ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
+add_executable(generateViewset src/generateViewset.cpp src/generateViews.cpp src/findPoints.cpp)
+target_link_libraries(generateViewset ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
 add_executable (publishPCD src/publishPCD.cpp)
 target_link_libraries (publishPCD ${catkin_LIBRARIES} ${PCL_LIBRARIES})

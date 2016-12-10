@@ -58,7 +58,8 @@ using namespace std;
 //count is a varuiable used to make sure that the node only generates the poses once
 bool first_time = true;
 //A two dimensional vector used to hold the poses generated around the object
-std::vector<std::vector<geometry_msgs::Pose> > pose_2Dcontainer;
+//std::vector<std::vector<geometry_msgs::Pose> > pose_2Dcontainer;
+std::vector<std::vector<finalFilteredCloud> > all_view_information;
 
 geometry_msgs::Point center;
 
@@ -110,7 +111,7 @@ void callback(const PointCloud::ConstPtr& msg)
 		*/
 
         // vector used to collect all the filtered clouds, we will develop most efficienct sets from this list of filetered clouds
-        std::vector<finalFilteredCloud> filteredObjects;
+        //std::vector<finalFilteredCloud> filteredObjects;
 
     	//Finds the points of the circle around the center of the object	
     	for (float theta = 0; theta < 2*PI; theta += 0.175){
@@ -118,7 +119,8 @@ void callback(const PointCloud::ConstPtr& msg)
     		float x = (buffer_Dist + dist_circle_center) * (float) cos(theta);
     		float y = (buffer_Dist+ dist_circle_center) * (float) sin(theta);
     		float yaw =  PI + theta; // (float) sin(.5 * theta);
-    		std::vector<geometry_msgs::Pose> new_coordinate_pose;
+    		//std::vector<geometry_msgs::Pose> new_coordinate_pose;
+             std::vector<finalFilteredCloud> filteredObjects;
 
     		//for loop for the 5 different orientations of the poses
     		for(float pitch_angle = -1 * (2 * PI) / 6; pitch_angle <= (2 * PI) / 6; pitch_angle += PI / 6){
@@ -133,14 +135,15 @@ void callback(const PointCloud::ConstPtr& msg)
                 // in other words, the viewPoint at new_coordinate_pose.get(i) produced the filteredCloud at filteredObjects.get(i)
 
     			//Add the calculated pose to the array of poses
-    			new_coordinate_pose.push_back(viewPoint);
+    			//new_coordinate_pose.push_back(viewPoint);
 
                 // filtering out the cloud based on input and collecting all those point clouds
                 filteredObjects.push_back(findPoints(viewPoint, msg));
                 //printf ("Percent of object viewed is: %f\n", findPoints(viewPoint, msg));
     		}
     		//Add the vector of poses containing the same position but different orientations
-    		pose_2Dcontainer.push_back(new_coordinate_pose);
+    		//pose_2Dcontainer.push_back(new_coordinate_pose);
+            all_view_information.push_back(filteredObjects);
     	}
         printf("IM FINISHED WITH THE FOR LOOP (GENERATEVIEWS)\n");
 

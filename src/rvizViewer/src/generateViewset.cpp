@@ -18,39 +18,40 @@
 
  #include <ros/ros.h>
  #include <pcl_ros/point_cloud.h>
- #include "generateViews.h"
  #include <pcl/point_types.h>
  #include <boost/foreach.hpp>
  #include <ros/package.h>
  #include <geometry_msgs/Pose.h>
  #include <geometry_msgs/Point.h>
  #include "findPoints.h"
- // #include "pose_object.h"
- // #include "viewSet_object.h"
+ #include "generateViews.h"
+ // #include "ViewSet_Object.h"
 
- typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
- typedef std::vector<std::vector<bool>> booleanMatrix;
- typedef std::vector<std::vector<pose_object>> pose_obj_array;
- typedef std::std::vector<pose_object> Pose_Set;
+
+
+ // typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
+ // typedef std::vector<std::vector<bool>> booleanMatrix;
+ // typedef std::vector<std::vector<pose_object>> pose_obj_array;
+ // typedef std::std::vector<pose_object> Pose_Set;
 
  void callback(const PointCloud::ConstPtr& msg)
  {
      // Calls generate views and expects all pose object info returned
-     pose_obj_array views = generate_views();
+     // pose_obj_array views = generate_views();
 
-     //Create Initial Viewsets Based on the starting position
+     // //Create Initial Viewsets Based on the starting position
     
-     viewSet_object first;
-     viewSet_object second;
-     viewSet_object third;
-     viewSet_object fourth;
-     viewSet_object fifth;
+     // viewSet_object first;
+     // viewSet_object second;
+     // viewSet_object third;
+     // viewSet_object fourth;
+     // viewSet_object fifth;
 
-     for(std::vector<pose_object> current_array: pose_obj_array;)
-     {
+     // for(std::vector<pose_object> current_array: pose_obj_array;)
+     // {
 
-     }
-     //ROS_INFO("Center x = %f,  y = %f,  z = %f \n", center.x, center.y, center.z);
+     // }
+     // ROS_INFO("Center x = %f,  y = %f,  z = %f \n", center.x, center.y, center.z);
 
      /*
      BOOST_FOREACH (const pcl::PointXYZ& pt, msg->points)
@@ -58,7 +59,7 @@
      */
  }
 
- int main(int argc, char** argv)
+ int main(int argc, char **argv)
  {
      //Subscriber 
      ros::init(argc, argv, "generate_views");

@@ -3,11 +3,11 @@
 
 #include <ros/ros.h>
 #include <pcl_ros/point_cloud.h>
-#include "findPoints.h"
 #include <pcl/point_types.h>
 #include <boost/foreach.hpp>
 #include <math.h>
 #include <geometry_msgs/Pose.h>
+#include "findPoints.h"
 
-std::vector<std::vector<finalFilteredCloud> > generateViews(const PointCloud::ConstPtr& msg)
+std::vector<std::vector<finalFilteredCloud> > generateViews(const PointCloud::ConstPtr& msg);
 #endif /* GENERATEVIEWS_H */

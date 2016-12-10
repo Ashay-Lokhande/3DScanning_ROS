@@ -41,13 +41,13 @@
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/PoseStamped.h>
-#include "findPoints.h"
 #include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/publisher.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <tf/tf.h>
+#include "findPoints.h"
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
@@ -211,27 +211,27 @@ std::vector<std::vector<finalFilteredCloud> > generateViews(const PointCloud::Co
     */
 }
 
-int main(int argc, char** argv)
-{
-    //Subscriber 
-    ros::init(argc, argv, "generate_views");
-    ros::NodeHandle nh;
-    // ros::Subscriber sub = nh.subscribe<PointCloud>("cloud", 1, callback);
-    ros:: spin();
+// int main(int argc, char** argv)
+// {
+//     //Subscriber 
+//     ros::init(argc, argv, "generate_views");
+//     ros::NodeHandle nh;
+//     // ros::Subscriber sub = nh.subscribe<PointCloud>("cloud", 1, callback);
+//     ros:: spin();
 
-/*
-    //Publsher
-    ros::NodeHandle n;
-    ros::Publisher pub = n.advertise<std::vector<std::vector<geometry_msgs::Pose> > >("poses", 1);
-    ros::Rate loop_rate(10);
 
-    while (ros::ok())
-    {
-        pub.publish(pose_2Dcontainer);
-        loop_rate.sleep();
-    }
-*/
-    //ros::spin();
-}
+//     //Publsher
+//     ros::NodeHandle n;
+//     ros::Publisher pub = n.advertise<std::vector<std::vector<geometry_msgs::Pose> > >("poses", 1);
+//     ros::Rate loop_rate(10);
+
+//     while (ros::ok())
+//     {
+//         pub.publish(pose_2Dcontainer);
+//         loop_rate.sleep();
+//     }
+
+//     //ros::spin();
+//}
 
 

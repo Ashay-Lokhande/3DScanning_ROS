@@ -114,16 +114,16 @@ void callback(const PointCloud::ConstPtr& msg)
 
     	//Finds the points of the circle around the center of the object	
     	for (float theta = 0; theta < 2*PI; theta += 0.175){
-    		const float buffer_Dist = 5; //this value is used to give a bsae distance of the circle from the object
+    		const float buffer_Dist = 2; //this value is used to give a bsae distance of the circle from the object
     		float x = (buffer_Dist + dist_circle_center) * (float) cos(theta);
     		float y = (buffer_Dist+ dist_circle_center) * (float) sin(theta);
     		float yaw =  PI + theta; // (float) sin(.5 * theta);
     		std::vector<geometry_msgs::Pose> new_coordinate_pose;
 
     		//for loop for the 5 different orientations of the poses
-    		for(float pitch_angle = -(2 * PI) / 6; pitch_angle <= (2 * PI) / 6; pitch_angle += PI / 6){
+    		for(float pitch_angle = -1 * (2 * PI) / 6; pitch_angle <= (2 * PI) / 6; pitch_angle += PI / 6){
     			geometry_msgs::Pose viewPoint;
-    			float pitch = (PI / 2) + pitch_angle;// (float) sin(.5 * pitch_angle);
+    			float pitch = PI + /*(PI / 2) + */pitch_angle;// (float) sin(.5 * pitch_angle);
     			viewPoint.position.x = x;
     			viewPoint.position.y = y;
     			viewPoint.position.z = CAMERA_HEIGHT;
@@ -188,6 +188,7 @@ void callback(const PointCloud::ConstPtr& msg)
                 maxViewable.percentageViewed);
 
         first_time = false;
+        findPoints(publishedPoint.pose, msg);
         ros::Rate loop_rate(4);
         while (nh.ok()) {
         	// publish it -> the filtered point cloud and where it was a viewed

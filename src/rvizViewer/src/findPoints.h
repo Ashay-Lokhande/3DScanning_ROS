@@ -8,11 +8,18 @@
 #include <math.h>
 #include <geometry_msgs/Pose.h>
 
+struct point_viewed{
+    geometry_msgs::Pose point;
+    int index;
+    int is_viewed;
+};
+
 struct finalFilteredCloud {
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
     geometry_msgs::Pose viewedFrom;
     double percentageViewed;
+    std::map<int, point_viewed> point_in_cloud;
 
 };
 

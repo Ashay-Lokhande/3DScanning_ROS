@@ -29,6 +29,13 @@ typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 // This angle is equal to the range(in radians) that the camera can see horiziontally
 #define camera_yaw_angle_range PI / 3
 
+// struct that represnts a point in the point cloud
+// it may be viewed (1) or not (0)
+struct point_viewed{
+    geometry_msgs::Pose point;
+    int index;
+    int is_viewed;
+};
 
 // struct to represent information of the filtered cloud
 // consists of filtered cloud and other useful information
@@ -38,8 +45,10 @@ struct finalFilteredCloud {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
     geometry_msgs::Pose viewedFrom;
     double percentageViewed;
-
+    std::map<int, point_viewed> point_in_cloud;
 };
+
+
 
 // calculating slope of line formed by two points in 3d space
 float calculate_slope(float pt_x, float pt_y, float pt_z, float pt2_x, float pt2_y, float pt2_z)
@@ -75,6 +84,7 @@ float distance(float x1, float y1, float z1, float x2, float y2, float z2){
 
 float getPitch(const geometry_msgs::Quaternion qt) {
   return atan2(2*(qt.y*qt.z + qt.w*qt.x), qt.w*qt.w - qt.x*qt.x - qt.y*qt.y + qt.z*qt.z);
+ //return atan2(2*(qt.x * qt.w - qt.y * qt.z), 1 - 2*(qt.x * qt.x - qt.z * qt.z));
 }
 
 float getYaw(const geometry_msgs::Quaternion qt){
@@ -85,6 +95,14 @@ float getRoll(const geometry_msgs::Quaternion qt) {
   return atan2(2*(qt.x*qt.y + qt.w*qt.z), qt.w*qt.w + qt.x*qt.x - qt.y*qt.y - qt.z*qt.z);
 }
 
+float find_angle(float x1, float y1, float z1, float x2, float y2, float z2){
+
+
+    float num = (x1 * x2 + y1 * y2 + z1 * z2);
+    float denom = sqrt(pow(x1, 2) + pow(y1, 2) + pow(z1, 2)) * sqrt(pow(x2, 2) + pow(y2, 2) + pow(z2, 2));
+
+    return acos(num / denom);
+}
 
 
 // method to find viewable points from a given view. 
@@ -119,41 +137,25 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
 
     printf("pitch_angle %f \n", pitch);
 
+
     // figure out the max slope and min slope on the y, z plane
     // given a specific camera pitch angle - this will help limit which points should be considered viewable
     // assuming a 60 degree camera viewfinder (vertically)
     float max_slope, min_slope;
 
-    max_slope = tan(pitch + (camera_pitch_angle_range / 2));
-    min_slope = tan(pitch - (camera_pitch_angle_range / 2));
+    max_slope = pitch + (camera_pitch_angle_range / 2); //tan(pitch + (camera_pitch_angle_range / 2));
+    min_slope = pitch - (camera_pitch_angle_range / 2); //tan(pitch - (camera_pitch_angle_range / 2));
 
-   
+    printf("max_angle %f \n", max_slope);
+    printf("min_angle %f \n", min_slope);
 
-   /*
-    if (pitch_angle = -(2 * PI) / 6) {
-        max_y_slope = -1.732;
-        min_y_slope = -9;
-        printf("Triggered 1\n");
-    } else if (pitch_angle = -(PI) / 6) {
-        max_y_slope = -0.577;
-        min_y_slope = -1.732;
-        printf("Triggered 2\n");
-    } else if (pitch_angle = 0) {
-        max_y_slope = 0;
-        min_y_slope = -0.577;
-        printf("Triggered 3\n");
-    } else if (pitch_angle = PI / 6) {
-        max_y_slope = 0.577;
-        min_y_slope = 0;
-        printf("Triggered 4\n");
-    } else if (pitch_angle = (2 * PI) / 6) {
-        max_y_slope = 1.732;
-        min_y_slope = 0.577;
-        printf("Triggered 5\n");
-    } */
+    printf("Yaw (%f), Yaw range (%f) - (%f)\n", yaw, (yaw / 2) - camera_yaw_angle_range, (yaw / 2) + camera_yaw_angle_range);
 
     // total number of points in the point cloud
     int size = 0;
+
+    // map that will be assigned to finalFilteredCloud when returned
+    std::map<int, point_viewed> point_in_cloud;
 
     // idea is that for a given line from the view point, slope is the same
     // we want to count for a single point and exclude all the other points on that line
@@ -162,15 +164,18 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
     // if slope is already contained, then check which point is closer
     // to the view point
     // map for: slope -> point
-    std::map<float, geometry_msgs::Pose> viewablePoints;
-    std::map<float, geometry_msgs::Pose>::iterator it;
+    std::map<float, point_viewed> viewablePoints;
+    std::map<float, point_viewed>::iterator it;
+    int keyIndex = 0;
     BOOST_FOREACH (const pcl::PointXYZ& pt, msg->points) {
         // ensures that the point in question is within the camera viewpoint (using the physical slopes calculated above)
         // I am assuming that vertical slope is a calculation of the y and z coordinates
-        float vertical_slope = calculate_slope(x, y, z, pt.x, pt.y, pt.z);
+        float vertical_slope = calculate_angle(y, z, pt.y, pt.z);//calculate_slope(x, y, z, pt.x, pt.y, pt.z);
+
         if (vertical_slope >= min_slope && vertical_slope <= max_slope) {
             // calculate the angle between the camera and the point in question
             double angle = calculate_angle(x, y, pt.x, pt.y);
+            //printf("Current angle = %f, which is in the range of max_slope (%f) and min_slope (%f)\n", vertical_slope, max_slope, min_slope);
             // if it is within the horizontal view range of the camera, proceed, otherwise stop
             if (angle <= (yaw / 2) + camera_yaw_angle_range && 
                     angle >= (yaw / 2) - camera_yaw_angle_range
@@ -182,18 +187,33 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
 
                 // if slope is already present
                 if(it != viewablePoints.end()) {
+
+
+
                     // if the slop is already taken into account
                     // then we must see the point it corresponds to is the closest to the view point
                     // if this new point is closer then must updates the map accordingly
-                    geometry_msgs::Pose existingPoint = it->second; // get the point
+                    geometry_msgs::Pose existingPoint = it->second.point; // get the point
+                    int indexOfExistingPoint = it->second.index;
                     float oldDistance = distance(x, y, z, existingPoint.position.x, existingPoint.position.y, existingPoint.position.z);
                     float newDistance = distance(x, y, z, pt.x, pt.y, pt.z);
                     if(newDistance < oldDistance) {
-                    	geometry_msgs::Pose newPose;
-            			newPose.position.x = pt.x;
-            			newPose.position.y = pt.y;
-            			newPose.position.z = pt.z;
-                        viewablePoints.insert(std::pair<float, geometry_msgs::Pose> (slope_pt_to_view, newPose));
+                        std::map<int, point_viewed>::iterator isPresent = point_in_cloud.find(indexOfExistingPoint); // no get method in map in C++, returns an iterator
+                        isPresent->second.is_viewed = 0; // older point is not viewable now. replace it with a closer point which is viewble
+
+                    	geometry_msgs::Pose pose;
+            			pose.position.x = pt.x;
+            			pose.position.y = pt.y;
+            			pose.position.z = pt.z;
+
+                        point_viewed newPoint;
+                        newPoint.point = pose;
+                        newPoint.is_viewed = 1;
+                        newPoint.index = keyIndex;
+
+
+                        viewablePoints.insert(std::pair<float, point_viewed> (slope_pt_to_view, newPoint));
+                        point_in_cloud.insert(std::pair<int, point_viewed> (keyIndex, newPoint));
                         //printf("Old point: %f, %f, %f with distance of %f\n", existingPoint.x, existingPoint.y, existingPoint.z, oldDistance);
                         //printf("New point: %f, %f, %f with distance of %f\n", newPoint.x, newPoint.y, newPoint.z, newDistance);
                     }
@@ -201,14 +221,21 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
                 } else {
                     // first time looking at this point
                     // just add it
-                    geometry_msgs::Pose newPose;
-                    newPose.position.x = pt.x;
-                    newPose.position.y = pt.y;
-                    newPose.position.z = pt.z;
-                    viewablePoints.insert(std::pair<float, geometry_msgs::Pose> (slope_pt_to_view, newPose));
+                    geometry_msgs::Pose pose;
+                    pose.position.x = pt.x;
+                    pose.position.y = pt.y;
+                    pose.position.z = pt.z;
+
+                    point_viewed newPoint;
+                    newPoint.point = pose;
+                    newPoint.index = keyIndex;
+                    newPoint.is_viewed = 1;
+                    viewablePoints.insert(std::pair<float, point_viewed> (slope_pt_to_view, newPoint));
+                    point_in_cloud.insert(std::pair<int, point_viewed> (keyIndex, newPoint));
                 }
             }
         }
+        keyIndex++;
         size++; // totalNum points
 
     }
@@ -243,16 +270,15 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
 
     	// ideally no segfaults because filterdCloud size 
     	// is viewable points * 1 == viewablePoints.size();
-    	filteredCloud->points[filterIndex].x = it->second.position.x;
-    	filteredCloud->points[filterIndex].y = it->second.position.y;
-    	filteredCloud->points[filterIndex].z = it->second.position.z;
+    	filteredCloud->points[filterIndex].x = it->second.point.position.x;
+    	filteredCloud->points[filterIndex].y = it->second.point.position.y;
+    	filteredCloud->points[filterIndex].z = it->second.point.position.z;
 
     }
+
     // return a new object that represents the cloud to be published
     // along with other information that may be useful
     // to add more useful features, change the struct above and the .h file
-
-
     
     ret.cloud = filteredCloud;
     ret.percentageViewed = 100 * viewablePoints.size() / (float) size;

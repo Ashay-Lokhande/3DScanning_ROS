@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include <pcl_ros/point_cloud.h>
+#include "findPoints.h"
 #include <pcl/point_types.h>
 #include <boost/foreach.hpp>
 #include <math.h>

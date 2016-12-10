@@ -1,0 +1,3 @@
+Things that must be implemented soon
+	1) Convert generate views to a function to be called by Generate_Viewset
+	2) Fix the CMake file to include generate viewset and the viewset object files

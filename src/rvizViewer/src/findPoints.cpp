@@ -167,8 +167,7 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
     std::map<float, point_viewed> viewablePoints;
     std::map<float, point_viewed>::iterator it;
     int keyIndex = 0;
-    BOOST_FOREACH (const pcl::PointXYZ& pt, msg->points) 
-    {
+    BOOST_FOREACH (const pcl::PointXYZ& pt, msg->points) {
         // ensures that the point in question is within the camera viewpoint (using the physical slopes calculated above)
         // I am assuming that vertical slope is a calculation of the y and z coordinates
         float vertical_slope = calculate_angle(y, z, pt.y, pt.z);//calculate_slope(x, y, z, pt.x, pt.y, pt.z);

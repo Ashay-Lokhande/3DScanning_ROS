@@ -18,6 +18,7 @@ class ViewSet_Object {
 
       public:
       	viewSet_object(finalFilteredCloud view);
+        update(finalFilteredCloud best_struct, double best_percentage, boolean_struct best_combined);
 };
 
 

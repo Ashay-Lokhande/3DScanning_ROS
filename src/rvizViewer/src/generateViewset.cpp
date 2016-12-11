@@ -15,7 +15,6 @@
             - Make a method of forming view sets through the use of these boolean sets
                 - Using logical OR/XOR we can combine the views and fijnd a way of comparing viewsets
 */
-
  #include <ros/ros.h>
  #include <pcl_ros/point_cloud.h>
  #include <pcl/point_types.h>
@@ -27,29 +26,105 @@
  #include "generateViews.h"
  // #include "ViewSet_Object.h"
 
+typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
+typedef std::vector<std::vector<finalFilteredCloud> > view_info_array;
+typedef std::map<int, point_viewed> boolean_struct ;
 
+/*
+    Pre-Conditions:
+        boolean_struct x and y should be of the same size
+    Post-Conditions: 
+        Alters the boolean_struct object that is passed in to parameter x
+*/
+public boolean_struct combine_booleans(boolean_struct x, boolean_struct y)
+{
+    std::std::map<int, point_viewed>::iterator it1;
+    std::std::map<int, point_viewed>::iterator it2;
 
- // typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
- // typedef std::vector<std::vector<bool>> booleanMatrix;
- // typedef std::vector<std::vector<pose_object>> pose_obj_array;
- // typedef std::std::vector<pose_object> Pose_Set;
+    it1 = x.begin();
+    it2 = y.begin();
 
- void callback(const PointCloud::ConstPtr& msg)
- {
-     // Calls generate views and expects all pose object info returned
-     // pose_obj_array views = generate_views();
+    while(it1 != x.end() && it2 != y.end())
+    {
+        if(it1->second.x.isViewed != 1 && it2->second.y.isViewed == 1)
+        {
+            it1.second.x.isViewed = 1;
+        }
 
-     // //Create Initial Viewsets Based on the starting position
-    
-     // viewSet_object first;
-     // viewSet_object second;
-     // viewSet_object third;
-     // viewSet_object fourth;
-     // viewSet_object fifth;
+        it1++;
+        it2++;
+    }
 
-     // for(std::vector<pose_object> current_array: pose_obj_array;)
-     // {
+    return x;
+}
 
+public double find_percent(boolean_struct z)
+{
+    int numViewed = 0;
+    std:::std::map<int, point_viewed>::iterator it;
+
+    for(it = z.begin(); it != z.end; it++)
+    {
+        if(it->second.z.isViewed == 1)
+            numViewed++;
+    }
+
+    return ((float) numViewed) / z.size() * 100;
+}
+
+// Distance is used to make sure that the pose we addd will always be the one clo
+public double findDist(geometry_msgs:::Pose one, geometry_msgs::Pose two)
+{
+    double x,y,z;
+    x = pow(one.position.x - two.position.x, 2);
+    y = pow(one.position.y - two.position.y, 2);
+    z = pow(one.position.z - two.position.z, 2);
+
+    return sqrt(x + y + z);
+}
+
+void callback(const PointCloud::ConstPtr& msg)
+{
+    geometry_msgs::Pose origin;
+
+    // Calls generate views and expects all pose object info returned
+    view_info_array views = generate_views();
+
+    for(int i = 0; i < 5; i++)
+    {
+        viewSets[index] = new viewSet_object(views.at(0).at(index));
+        origin = views.at(0).at(index);
+
+        while(viewSets[index].total_percent <= 95.0)
+        {
+            finalFilteredCloud best_struct;
+            boolean_struct best_combined;
+            double best_percentage = 0;
+            double distance = 0;
+
+            for(std::vector<finalFilteredCloud> current_vector: views)
+            {
+
+                for(finalFilteredCloud current_view: current_vector)
+                {curr
+                    boolean_struct current_combined = combine_booleans(viewSets[index].combinedMatrix, current_view.point_in_cloud);
+                    double current_percentage = find_percent(current_combined); 
+                    double cdist = findDist(origin, current_view.viewedFrom);
+
+                    if((current_percentage > best_percentage) || (current_percentage == best_percentage && distance > cdist))
+                    {
+                        best_percentage = current_percentage;
+                        distance = cdist;
+                        best_struct = current_view;
+                        best_combined = current_combined;
+                    }
+                }
+            }
+
+            viewSets[index].update(best_struct, best_percentage, best_combined);
+            
+        }
+    }
      // }
      // ROS_INFO("Center x = %f,  y = %f,  z = %f \n", center.x, center.y, center.z);
 

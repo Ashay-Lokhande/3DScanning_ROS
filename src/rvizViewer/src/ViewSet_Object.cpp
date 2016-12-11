@@ -4,11 +4,16 @@ ViewSet_Object::ViewSet_Object(finalFilteredCloud view)
 {
 	view_info_set.push_back(view);
 	cost = 0;
-	boolean_struct = view.point_in_cloud;
+	combinedMatrix = view.point_in_cloud;
 	total_percent = view.percentageViewed;
 }
 
-
+ViewSet_Object::update(finalFilteredCloud best_struct, double best_percentage, boolean_struct best_combined)
+{
+	view_info_set.push_back(best_struct);
+	combinedMatrix = best_combined;
+	total_percent = best_percentage;
+}
 
 /*
 std::map<int, point_viewed> boolean_struct;

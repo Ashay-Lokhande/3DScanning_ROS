@@ -11,6 +11,7 @@ ViewSet_Object::ViewSet_Object(finalFilteredCloud view)
 	cost = 0;
 	combinedMatrix = view.point_in_cloud;
 	total_percent = view.percentageViewed;
+  dist_travelled = 0;
 }
 
 void ViewSet_Object::update(finalFilteredCloud best_struct, double best_percentage, boolean_struct best_combined)

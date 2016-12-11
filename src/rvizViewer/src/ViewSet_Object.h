@@ -14,6 +14,7 @@ class ViewSet_Object {
       double cost;			       // Cost of movement between poses (orientation change is negligable)
       boolean_struct combinedMatrix;  	       // Combined boolMatrices
       double total_percent;		       // Total percent of object viewable from poses
+      double dist_travelled;         // Distance traveled for the views in the viewset
       //geometry_msgs::Pose[] pose_views;
 
       // Functions

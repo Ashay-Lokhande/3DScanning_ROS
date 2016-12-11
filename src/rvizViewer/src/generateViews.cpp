@@ -121,15 +121,14 @@ std::vector<std::vector<finalFilteredCloud> > generateViews(const PointCloud::Co
     		float yaw =  PI + theta; // (float) sin(.5 * theta);
     		//std::vector<geometry_msgs::Pose> new_coordinate_pose;
              std::vector<finalFilteredCloud> filteredObjects;
-
     		//for loop for the 5 different orientations of the poses
-    		for(float pitch_angle = -1 * (2 * PI) / 6; pitch_angle <= (2 * PI) / 6; pitch_angle += PI / 6){
+    		for(float pitch_angle = -1 * (2 * PI) / 6; pitch_angle < ((2 * PI) / 6) + 0.00002; pitch_angle += PI / 6){
     			geometry_msgs::Pose viewPoint;
     			float pitch = PI + /*(PI / 2) + */pitch_angle;// (float) sin(.5 * pitch_angle);
     			viewPoint.position.x = x;
     			viewPoint.position.y = y;
     			viewPoint.position.z = CAMERA_HEIGHT;
-    			viewPoint.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, pitch, yaw);
+    			//viewPoint.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, pitch, yaw);
     			
                 // below there is a one to one correspondence between a viewPoint and the filteredObject produced.
                 // in other words, the viewPoint at new_coordinate_pose.get(i) produced the filteredCloud at filteredObjects.get(i)

@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
     
     PMDCloudPublisher c;
     c.file_name = "spray_bottle.pcd";
-    nh.getParam("spray_bottle", c.file_name);
+    nh.getParam("random", c.file_name);
 
     if (c.start () == -1)
     {

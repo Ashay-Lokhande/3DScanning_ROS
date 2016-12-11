@@ -24,7 +24,7 @@
  #include <geometry_msgs/Point.h>
  #include "findPoints.h"
  #include "generateViews.h"
- // #include "ViewSet_Object.h"
+ #include "ViewSet_Object.h"
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 typedef std::vector<std::vector<finalFilteredCloud> > view_info_array;
@@ -36,19 +36,19 @@ typedef std::map<int, point_viewed> boolean_struct ;
     Post-Conditions: 
         Alters the boolean_struct object that is passed in to parameter x
 */
-public boolean_struct combine_booleans(boolean_struct x, boolean_struct y)
+boolean_struct combine_booleans(boolean_struct x, boolean_struct y)
 {
-    std::std::map<int, point_viewed>::iterator it1;
-    std::std::map<int, point_viewed>::iterator it2;
+    std::map<int, point_viewed>::iterator it1;
+    std::map<int, point_viewed>::iterator it2;
 
     it1 = x.begin();
     it2 = y.begin();
 
     while(it1 != x.end() && it2 != y.end())
     {
-        if(it1->second.x.isViewed != 1 && it2->second.y.isViewed == 1)
+        if(it1->second.is_viewed != 1 && it2->second.is_viewed == 1)
         {
-            it1.second.x.isViewed = 1;
+            it1->second.is_viewed = 1;
         }
 
         it1++;
@@ -58,14 +58,14 @@ public boolean_struct combine_booleans(boolean_struct x, boolean_struct y)
     return x;
 }
 
-public double find_percent(boolean_struct z)
+double find_percent(boolean_struct z)
 {
     int numViewed = 0;
-    std:::std::map<int, point_viewed>::iterator it;
+    std::map<int, point_viewed>::iterator it;
 
-    for(it = z.begin(); it != z.end; it++)
+    for(it = z.begin(); it != z.end(); it++)
     {
-        if(it->second.z.isViewed == 1)
+        if(it->second.is_viewed == 1)
             numViewed++;
     }
 
@@ -73,7 +73,7 @@ public double find_percent(boolean_struct z)
 }
 
 // Distance is used to make sure that the pose we addd will always be the one clo
-public double findDist(geometry_msgs:::Pose one, geometry_msgs::Pose two)
+double findDist(geometry_msgs::Pose one, geometry_msgs::Pose two)
 {
     double x,y,z;
     x = pow(one.position.x - two.position.x, 2);
@@ -88,12 +88,14 @@ void callback(const PointCloud::ConstPtr& msg)
     geometry_msgs::Pose origin;
 
     // Calls generate views and expects all pose object info returned
-    view_info_array views = generate_views();
+    view_info_array views = generateViews(msg);
+    ViewSet_Object viewSets[5];
 
-    for(int i = 0; i < 5; i++)
+    for(int index = 0; index < 5; index++)
     {
-        viewSets[index] = new viewSet_object(views.at(0).at(index));
-        origin = views.at(0).at(index);
+        ViewSet_Object ob = ViewSet_Object(views.at(0).at(index));
+        viewSets[index] = ob;
+        origin = views.at(0).at(index).viewedFrom;
 
         while(viewSets[index].total_percent <= 95.0)
         {
@@ -102,24 +104,34 @@ void callback(const PointCloud::ConstPtr& msg)
             double best_percentage = 0;
             double distance = 0;
 
-            for(std::vector<finalFilteredCloud> current_vector: views)
-            {
 
-                for(finalFilteredCloud current_view: current_vector)
-                {curr
-                    boolean_struct current_combined = combine_booleans(viewSets[index].combinedMatrix, current_view.point_in_cloud);
+            view_info_array::iterator it;
+            for(it = views.begin(); it != views.end(); it++){
+                std::vector<finalFilteredCloud>::iterator innerIt;
+                for(innerIt = (*it).begin(); innerIt != (*it).end(); innerIt++){
+
+                    boolean_struct current_combined = combine_booleans(viewSets[index].combinedMatrix, (*innerIt).point_in_cloud);
                     double current_percentage = find_percent(current_combined); 
-                    double cdist = findDist(origin, current_view.viewedFrom);
+                    double cdist = findDist(origin, (*innerIt).viewedFrom);
 
                     if((current_percentage > best_percentage) || (current_percentage == best_percentage && distance > cdist))
                     {
                         best_percentage = current_percentage;
                         distance = cdist;
-                        best_struct = current_view;
+                        best_struct = (*innerIt);
                         best_combined = current_combined;
                     }
+
                 }
             }
+            // for(std::vector<finalFilteredCloud> current_vector : views)
+            // {
+
+            //     for(finalFilteredCloud current_view : current_vector)
+            //     {
+
+            //     }
+            // }
 
             viewSets[index].update(best_struct, best_percentage, best_combined);
             

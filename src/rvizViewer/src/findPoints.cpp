@@ -135,9 +135,6 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
     float pitch = getPitch(createdPoint.orientation);
     float yaw = getYaw(createdPoint.orientation);
 
-    printf("pitch_angle %f \n", pitch);
-
-
     // figure out the max slope and min slope on the y, z plane
     // given a specific camera pitch angle - this will help limit which points should be considered viewable
     // assuming a 60 degree camera viewfinder (vertically)
@@ -145,11 +142,6 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
 
     max_slope = pitch + (camera_pitch_angle_range / 2); //tan(pitch + (camera_pitch_angle_range / 2));
     min_slope = pitch - (camera_pitch_angle_range / 2); //tan(pitch - (camera_pitch_angle_range / 2));
-
-    printf("max_angle %f \n", max_slope);
-    printf("min_angle %f \n", min_slope);
-
-    printf("Yaw (%f), Yaw range (%f) - (%f)\n", yaw, (yaw / 2) - camera_yaw_angle_range, (yaw / 2) + camera_yaw_angle_range);
 
     // total number of points in the point cloud
     int size = 0;
@@ -172,15 +164,15 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
         // I am assuming that vertical slope is a calculation of the y and z coordinates
         float vertical_slope = calculate_angle(y, z, pt.y, pt.z);//calculate_slope(x, y, z, pt.x, pt.y, pt.z);
 
-        if (vertical_slope >= min_slope && vertical_slope <= max_slope) {
+        //if (vertical_slope >= min_slope && vertical_slope <= max_slope) {
             // calculate the angle between the camera and the point in question
             double angle = calculate_angle(x, y, pt.x, pt.y);
             //printf("Current angle = %f, which is in the range of max_slope (%f) and min_slope (%f)\n", vertical_slope, max_slope, min_slope);
             // if it is within the horizontal view range of the camera, proceed, otherwise stop
-            if (angle <= (yaw / 2) + camera_yaw_angle_range && 
-                    angle >= (yaw / 2) - camera_yaw_angle_range
+            //if (angle <= (yaw / 2) + camera_yaw_angle_range && 
+            //        angle >= (yaw / 2) - camera_yaw_angle_range
                     //abs(angle) <= yaw / 2
-                ){
+            //    ){
 
                 float slope_pt_to_view = round(calculate_slope(x, y, z, pt.x, pt.y, pt.z) * 100000.0) / 100000.0 ;
                 it = viewablePoints.find(slope_pt_to_view);
@@ -233,8 +225,8 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
                     viewablePoints.insert(std::pair<float, point_viewed> (slope_pt_to_view, newPoint));
                     point_in_cloud.insert(std::pair<int, point_viewed> (keyIndex, newPoint));
                 }
-            }
-        }
+            //}
+        //}
         keyIndex++;
         size++; // totalNum points
 

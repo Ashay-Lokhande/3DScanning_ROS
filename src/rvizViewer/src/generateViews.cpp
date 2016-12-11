@@ -62,6 +62,7 @@ bool first_time = true;
 std::vector<std::vector<finalFilteredCloud> > all_view_information;
 
 geometry_msgs::Point center;
+
 std::vector<std::vector<finalFilteredCloud> > generateViews(const PointCloud::ConstPtr& msg)
 {
     

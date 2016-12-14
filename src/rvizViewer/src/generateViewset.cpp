@@ -158,15 +158,7 @@ void callback(const PointCloud::ConstPtr& msg)
 
                     }
                 }
-                // for(std::vector<finalFilteredCloud> current_vector : views)
-                // {
 
-                //     for(finalFilteredCloud current_view : current_vector)
-                //     {
-
-                //     }
-                // }
-                // printf("DISTANCE: %f\n", distance);
                 viewSets[index].dist_travelled = distance;
                 viewSets[index].update(best_struct, best_percentage, best_combined);
                 
@@ -183,6 +175,7 @@ void callback(const PointCloud::ConstPtr& msg)
     for(int count = 0; count < 5; count++){
         printf("%f, number of views: %d, Distance traveled: %f\n", viewSets[count].total_percent, viewSets[count].view_info_set.size(), viewSets[count].dist_travelled);
     }
+
     ros::NodeHandle nh;
     string publishTopicFilteredCloud1 = "filteredCloudA";
     string publishTopicFilteredCloud2 = "filteredCloudB";
@@ -195,7 +188,6 @@ void callback(const PointCloud::ConstPtr& msg)
     
 
     geometry_msgs::PoseArray poseArray;
-   // poseArray.poses();
     poseArray.header.frame_id = "/map";
     ros::Publisher poseArrayPub = nh.advertise<geometry_msgs::PoseArray> (publicTopicViewablePoint1, 1);
     ros::Publisher viewPointPub1 = nh.advertise<geometry_msgs::PoseStamped> ("temp", 1);
@@ -209,71 +201,16 @@ void callback(const PointCloud::ConstPtr& msg)
     publishedPoint1.pose = result.view_info_set.at(0).viewedFrom;
     publishedPoint2.pose = result.view_info_set.at(1).viewedFrom;
 
-
-    publishedPoint1.pose.orientation.x = 0;
-    publishedPoint1.pose.orientation.y = 0;
-    publishedPoint1.pose.orientation.z = 1.00;
-    publishedPoint1.pose.orientation.w = -0.001;
-
-    publishedPoint2.pose.orientation.x = 0.0;
-    publishedPoint2.pose.orientation.y = 0.0;
-    publishedPoint2.pose.orientation.z = 0.521;
-    publishedPoint2.pose.orientation.w = 0.854;
-
     for(int v = 0; v < result.view_info_set.size(); v++){
-
-        //printf("Viewed from coordinates: %f, %f, %f\n", result.view_info_set.at(v).viewedFrom.position.x,
-        //    result.view_info_set.at(v).viewedFrom.position.y,
-        //    result.view_info_set.at(v).viewedFrom.position.z);
         poseArray.poses.push_back(result.view_info_set.at(v).viewedFrom);
     }
-
-    poseArray.poses.at(0).orientation.x = 0;
-    poseArray.poses.at(0).orientation.y = 0;
-    poseArray.poses.at(0).orientation.z = 1;
-    poseArray.poses.at(0).orientation.w = -0.002;
-
-        poseArray.poses.at(1).orientation.x = 0;
-    poseArray.poses.at(1).orientation.y = 0;
-    poseArray.poses.at(1).orientation.z = 0.519;
-    poseArray.poses.at(1).orientation.w = 0.855;
-
-        poseArray.poses.at(2).orientation.x = 0;
-    poseArray.poses.at(2).orientation.y = 0;
-    poseArray.poses.at(2).orientation.z = -0.418;
-    poseArray.poses.at(2).orientation.w = 0.908;
-
-        poseArray.poses.at(3).orientation.x = 0;
-    poseArray.poses.at(3).orientation.y = 0;
-    poseArray.poses.at(3).orientation.z = 0.996;
-    poseArray.poses.at(3).orientation.w = -0.087;
-
-
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud1 = result.view_info_set.at(0).cloud;
     pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud2 = result.view_info_set.at(1).cloud;
 
     ros::Rate loop_rate(4);
     while (nh.ok()) {
-        // publish it -> the filtered point cloud and where it was a viewed
-        //cloudPub1.publish (filteredCloud1);
-        //cloudPub2.publish (filteredCloud2);
         poseArrayPub.publish(poseArray);
-        //viewPointPub1.publish(publishedPoint1);
-        //viewPointPub2.publish(publishedPoint2);
-   //     printf("The Quaternion is: x = %f, y = %f, z = %f, w = %f \n", 
-   //       publishedPoint.pose.orientation.x, publishedPoint.pose.orientation.y,
-   //       publishedPoint.pose.orientation.z, publishedPoint.pose.orientation.w);
-        // ros::spinOnce ();
         loop_rate.sleep ();
     }
-
-
-     // }
-     // ROS_INFO("Center x = %f,  y = %f,  z = %f \n", center.x, center.y, center.z);
-
-     /*
-     BOOST_FOREACH (const pcl::PointXYZ& pt, msg->points)
-         printf ("\t(%f, %f, %f)\n", pt.x, pt.y, pt.z);
-     */
  }

@@ -24,15 +24,3 @@ class ViewSet_Object {
 };
 
 #endif
-
-
-/*
-struct finalFilteredCloud {
-
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
-    geometry_msgs::Pose viewedFrom;
-    double percentageViewed;
-    std::map<int, point_viewed> point_in_cloud;
-};
-
-*/

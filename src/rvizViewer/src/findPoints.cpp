@@ -114,7 +114,6 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
     // the final object to return
     finalFilteredCloud ret;
     // printing the current view point
-    //printf("Coordinates: %f, %f, %f\n", createdPoint.position.x, createdPoint.position.y, createdPoint.position.z);
 
     // x,y,z represents the cooridnates of the view 
     float x = (createdPoint.position.x) ;// / (float) 250.0;
@@ -167,7 +166,6 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
         //if (vertical_slope >= min_slope && vertical_slope <= max_slope) {
             // calculate the angle between the camera and the point in question
             double angle = calculate_angle(x, y, pt.x, pt.y);
-            //printf("Current angle = %f, which is in the range of max_slope (%f) and min_slope (%f)\n", vertical_slope, max_slope, min_slope);
             // if it is within the horizontal view range of the camera, proceed, otherwise stop
             //if (angle <= (yaw / 2) + camera_yaw_angle_range && 
             //        angle >= (yaw / 2) - camera_yaw_angle_range
@@ -275,11 +273,6 @@ finalFilteredCloud findPoints(const geometry_msgs::Pose createdPoint, const Poin
     ret.cloud = filteredCloud;
     ret.point_in_cloud = point_in_cloud;
     ret.percentageViewed = 100 * viewablePoints.size() / (float) size;
-    //printf("percentage viewed from: (%f, %f, %f) (from findpoints): %f\n", ret.viewedFrom.position.x, 
-         // ret.viewedFrom.position.y,  ret.viewedFrom.position.z, ret.percentageViewed);
     return ret;
-
-    //float viewableAmount = 
-    //return viewableAmount; // percentag of points viewed
 }
 
